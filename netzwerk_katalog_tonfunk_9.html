@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tonfunk Netzwerk-Katalog</title>
+<style>
+:root{--bg:#f7f8fa;--sf:#fff;--s2:#f0f2f5;--s3:#e8eaed;--bd:#e2e5e9;--bd2:#d0d4da;--tx:#0f1117;--tx2:#4a5568;--tx3:#8b95a1;--bl:#3b6ef6;--bl-l:#eef2fe;--bl-m:#c7d3fc;--gn:#16a34a;--gn-l:#f0fdf4;--gn-m:#bbf7d0;--am:#d97706;--am-l:#fffbeb;--am-m:#fde68a;--rd:#dc2626;--rd-l:#fef2f2;--rd-m:#fecaca;--pu:#7c3aed;--pu-l:#f5f3ff;--pu-m:#ddd6fe;--tl:#0891b2;--tl-l:#ecfeff;--tl-m:#a5f3fc;--r8:8px;--r12:12px;--r16:16px;--r24:24px;--sh:0 1px 3px rgba(0,0,0,.06);--sh2:0 4px 12px rgba(0,0,0,.08);--sh3:0 12px 32px rgba(0,0,0,.13)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif;font-size:14px;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
+#ps{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#667eea,#764ba2)}
+.pw{background:var(--sf);border-radius:var(--r24);padding:40px;width:370px;box-shadow:var(--sh3);text-align:center}
+.pw-logo{font-size:26px;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#3b6ef6,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.pw-sub{font-size:13px;color:var(--tx3);margin-bottom:26px}
+.pw-in{width:100%;padding:13px;text-align:center;font-size:22px;letter-spacing:8px;border:2px solid var(--bd);border-radius:var(--r12);font-family:monospace;outline:none}
+.pw-in:focus{border-color:var(--bl)}
+.pw-err{min-height:16px;font-size:12px;color:var(--rd);margin:7px 0}
+.pw-btn{width:100%;padding:12px;border-radius:var(--r12);border:none;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px}
+.pw-p{background:linear-gradient(135deg,#3b6ef6,#7c3aed);color:#fff}.pw-s{background:var(--s2);color:var(--tx2);margin-top:8px}
+#app{display:none;height:100vh;overflow:hidden;flex-direction:column}
+.hdr{background:var(--sf);border-bottom:1px solid var(--bd);height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;box-shadow:var(--sh)}
+.hdr-br{font-size:15px;font-weight:800;background:linear-gradient(135deg,#3b6ef6,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
+.hdr-sp{width:1px;height:18px;background:var(--bd);flex-shrink:0}
+.hdr-loc{font-size:12px;color:var(--tx3);white-space:nowrap}
+.gsr{position:relative;flex:1;max-width:310px;min-width:110px}
+.gsr input{width:100%;padding:7px 10px 7px 30px;border:1px solid var(--bd);border-radius:var(--r8);background:var(--s2);font-size:13px;color:var(--tx);outline:none}
+.gsr input:focus{background:var(--sf);border-color:var(--bl)}
+.gsr-i{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--tx3);pointer-events:none}
+.gsr-res{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r12);box-shadow:var(--sh3);z-index:300;max-height:340px;overflow-y:auto;display:none}
+.gsr-res.show{display:block}
+.gsr-grp{padding:7px 11px 3px;font-size:10px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;border-top:1px solid var(--bd)}
+.gsr-grp:first-child{border-top:none}
+.gsr-row{display:flex;align-items:center;gap:9px;padding:8px 12px;cursor:pointer}
+.gsr-row:hover{background:var(--s2)}
+.gsr-nm{font-size:13px;font-weight:600}.gsr-sb{font-size:11px;color:var(--tx3)}
+.hdr-r{margin-left:auto;display:flex;align-items:center;gap:7px;flex-shrink:0}
+.rtag{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.r-ed{background:var(--gn-l);color:var(--gn)}.r-rd{background:var(--s2);color:var(--tx3)}
+.sdrow{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx3)}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--bd2)}
+.sdot.ok{background:var(--gn)}.sdot.warn{background:var(--am)}.sdot.err{background:var(--rd)}
+.hbtn{width:32px;height:32px;border-radius:var(--r8);border:1px solid var(--bd);background:var(--sf);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--tx2)}
+.hbtn:hover{background:var(--s2)}
+.mtabs{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 16px;display:flex;gap:2px;flex-shrink:0}
+.mt{padding:0 13px;height:44px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:var(--tx3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.mt:hover{color:var(--tx)}.mt.active{color:var(--bl);border-bottom-color:var(--bl)}
+.mt.active.hs{color:var(--pu);border-bottom-color:var(--pu)}.mt.active.act{color:var(--tl);border-bottom-color:var(--tl)}.mt.active.da{color:var(--am);border-bottom-color:var(--am)}.mt.active.pb{color:var(--rd);border-bottom-color:var(--rd)}
+.stabs{background:linear-gradient(180deg,var(--sf),var(--bg));border-bottom:1px solid var(--bd);padding:0 16px;display:flex;gap:4px;flex-shrink:0}
+.st{padding:0 13px;height:37px;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;border:none;background:none;cursor:pointer;color:var(--tx3);border-radius:var(--r8) var(--r8) 0 0;margin-top:4px;text-transform:uppercase;letter-spacing:.04em}
+.st:hover{color:var(--tx);background:var(--s2)}.st.active{background:var(--sf);color:var(--bl);border:1px solid var(--bd);border-bottom:1px solid var(--sf);box-shadow:var(--sh)}.st.active.hs{color:var(--pu)}
+.layout{display:flex;flex:1;overflow:hidden}
+.lc{flex:1;overflow-y:auto;padding:14px 16px;min-width:0}
+.dc{width:400px;flex-shrink:0;background:var(--sf);border-left:1px solid var(--bd);overflow-y:auto;display:none}.dc.show{display:block}
+.tb{display:flex;align-items:center;gap:7px;margin-bottom:12px;flex-wrap:wrap}
+.sb{position:relative;flex:1;min-width:130px;max-width:210px}
+.sb input{width:100%;padding:7px 10px 7px 30px;border:1px solid var(--bd);border-radius:var(--r8);background:var(--sf);font-size:13px;color:var(--tx);outline:none}
+.sb input:focus{border-color:var(--bl)}
+.sb-i{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--tx3);pointer-events:none}
+.fil{padding:7px 10px;border:1px solid var(--bd);border-radius:var(--r8);background:var(--sf);font-size:12px;color:var(--tx2);outline:none;cursor:pointer;font-weight:500;max-width:150px}
+.mla{margin-left:auto;display:flex;gap:6px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;font-size:13px;font-weight:600;border-radius:var(--r8);border:1px solid var(--bd);background:var(--sf);color:var(--tx);cursor:pointer;transition:all .15s;text-decoration:none;white-space:nowrap;line-height:1}
+.btn:hover{background:var(--s2);border-color:var(--bd2)}
+.b-p{background:var(--bl);color:#fff;border-color:var(--bl)}.b-p:hover{background:#2a5ce5}.b-p.hs{background:var(--pu);border-color:var(--pu)}.b-p.hs:hover{background:#6b30d1}.b-p.act{background:var(--tl);border-color:var(--tl)}.b-p.act:hover{background:#0771a0}
+.b-sm{padding:5px 9px;font-size:12px}.b-g{border-color:transparent;background:transparent}.b-g:hover{background:var(--s2)}.b-d{color:var(--rd);border-color:transparent;background:transparent}.b-d:hover{background:var(--rd-l)}.b-pro{color:var(--gn);border-color:var(--gn-m);background:var(--gn-l)}.b-pro:hover{background:#dcfce7}
+.stats{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.sc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r12);padding:11px 14px;min-width:84px;box-shadow:var(--sh)}
+.sc-l{font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}.sc-v{font-size:22px;font-weight:800;letter-spacing:-.5px}
+.d-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.kpi{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r12);padding:14px;text-align:center;box-shadow:var(--sh);cursor:pointer}.kpi:hover{box-shadow:var(--sh2)}
+.kpi-v{font-size:28px;font-weight:800;letter-spacing:-1px}.kpi-l{font-size:11px;color:var(--tx2);font-weight:600;margin-top:3px}
+.d-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.d-card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r16);padding:16px;box-shadow:var(--sh)}
+.d-ct{font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:11px}
+.d-row{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd);cursor:pointer}.d-row:last-child{border-bottom:none}.d-row:hover{opacity:.75}
+.d-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}.d-t{font-size:13px;font-weight:600}.d-s{font-size:11px;color:var(--tx3);margin-top:2px}
+.card-list{display:flex;flex-direction:column;gap:7px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r12);padding:13px 14px;cursor:pointer;transition:all .15s;box-shadow:var(--sh)}.card:hover{border-color:var(--bd2);box-shadow:var(--sh2);transform:translateY(-1px)}.card.sel{border-color:var(--bl);box-shadow:0 0 0 3px rgba(59,110,246,.1)}.card.sel.hs{border-color:var(--pu);box-shadow:0 0 0 3px rgba(124,58,237,.1)}.card.sel.act{border-color:var(--tl);box-shadow:0 0 0 3px rgba(8,145,178,.1)}.card.ov{border-left:3px solid var(--rd)}.card.ds{border-left:3px solid var(--am)}
+.c-head{display:flex;align-items:flex-start;gap:9px;margin-bottom:5px}
+.av{width:34px;height:34px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.c-t{font-size:14px;font-weight:700;line-height:1.3}.c-s{font-size:12px;color:var(--tx2);margin-top:2px}
+.c-foot{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:7px}.c-act{display:flex;gap:4px;margin-left:auto;flex-shrink:0}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.b-gn{background:var(--gn-l);color:var(--gn)}.b-bl{background:var(--bl-l);color:var(--bl)}.b-am{background:var(--am-l);color:var(--am)}.b-rd{background:var(--rd-l);color:var(--rd)}.b-pu{background:var(--pu-l);color:var(--pu)}.b-tl{background:var(--tl-l);color:var(--tl)}.b-gr{background:var(--s2);color:var(--tx3)}
+.chip{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--bl-m);background:var(--bl-l);color:var(--bl)}.chip:hover{background:var(--bl-m)}.chip.hs{border-color:var(--pu-m);background:var(--pu-l);color:var(--pu)}.chip.hs:hover{background:var(--pu-m)}
+.dp-sticky{position:sticky;top:0;background:var(--sf);z-index:10;border-bottom:1px solid var(--bd);padding:12px 16px;display:flex;align-items:flex-start;gap:7px}
+.dp-hc{flex:1;min-width:0}.dp-t{font-size:15px;font-weight:800;line-height:1.3}.dp-s{font-size:12px;color:var(--tx2);margin-top:3px}
+.dp-cl{width:28px;height:28px;border-radius:var(--r8);border:1px solid var(--bd);background:var(--sf);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--tx2);font-size:15px;flex-shrink:0}.dp-cl:hover{background:var(--s2)}
+.dps{padding:12px 16px;border-bottom:1px solid var(--bd)}.dps:last-child{border-bottom:none}
+.dps-t{font-size:10px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px}
+.dpf{margin-bottom:8px}.dpf-l{font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}.dpf-v{font-size:13px;color:var(--tx);line-height:1.5}
+.dp-g2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:8px}
+.dp-lnk{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:var(--r8);border:1px solid var(--bd);cursor:pointer;transition:all .15s;margin-bottom:4px}.dp-lnk:hover{background:var(--s2)}.dp-lnk-d{width:7px;height:7px;border-radius:50%;flex-shrink:0}.dp-lnk-n{font-size:12px;font-weight:700}.dp-lnk-s{font-size:11px;color:var(--tx2);margin-top:1px}
+.dp-em{font-size:12px;color:var(--tx3);font-style:italic}
+.wv-r{color:var(--rd);font-weight:700}.wv-a{color:var(--am);font-weight:700}.wv-g{color:var(--gn)}.wv-n{color:var(--tx3)}
+.chr-i{border:1px solid var(--bd);border-radius:var(--r8);padding:9px 12px;margin-bottom:6px;background:var(--s2)}.chr-m{display:flex;align-items:center;gap:8px;margin-bottom:4px}.chr-d{font-size:11px;font-weight:700;color:var(--tx3)}.chr-w{font-size:11px;color:var(--tx2)}.chr-t{font-size:12px;color:var(--tx);line-height:1.5}
+.chr-form{margin-top:8px;padding-top:8px;border-top:1px solid var(--bd);display:flex;flex-direction:column;gap:6px}
+.chr-form input,.chr-form textarea{padding:7px 9px;border:1px solid var(--bd);border-radius:var(--r8);font-size:12px;font-family:inherit;outline:none;width:100%}.chr-form textarea{min-height:52px;resize:vertical}
+.ping-i{background:var(--am-l);border:1px solid var(--am-m);border-radius:var(--r8);padding:9px 11px;margin-bottom:5px}.ping-w{font-size:12px;font-weight:700}.ping-m{font-size:12px;color:var(--tx2);margin-top:2px;line-height:1.4}.ping-d{font-size:10px;color:var(--tx3);margin-top:4px;font-weight:600}
+.ping-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;border:1px solid var(--am-m);background:var(--am-l);color:var(--am);font-size:11px;font-weight:700;cursor:pointer}.ping-btn:hover{background:var(--am-m)}
+.doc-i{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--bd);border-radius:var(--r8);margin-bottom:5px;background:var(--s2)}.doc-i a{font-size:12px;font-weight:600;color:var(--bl);text-decoration:none;flex:1}.doc-i a:hover{text-decoration:underline}.doc-d{font-size:11px;color:var(--tx3)}
+.match-i{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border:1px solid var(--bd);border-radius:var(--r8);margin-bottom:5px;cursor:pointer;background:var(--sf)}.match-i:hover{border-color:var(--bl-m);background:var(--bl-l)}.match-sc{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.sh-i{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd);font-size:12px}.sh-d{color:var(--tx3);width:80px;flex-shrink:0}
+.overlay{position:fixed;inset:0;background:rgba(15,17,23,.5);z-index:400;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal{background:var(--sf);border-radius:var(--r16);width:620px;max-width:95vw;max-height:92vh;overflow-y:auto;box-shadow:var(--sh3)}.m-hdr{padding:18px 20px 0;display:flex;align-items:center;justify-content:space-between}.m-t{font-size:16px;font-weight:800}.m-cl{width:28px;height:28px;border-radius:var(--r8);border:1px solid var(--bd);background:var(--sf);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--tx2)}.m-cl:hover{background:var(--s2)}.m-body{padding:18px 20px}.m-foot{padding:12px 20px 18px;display:flex;justify-content:flex-end;gap:7px;border-top:1px solid var(--bd)}
+.ff{margin-bottom:12px}.ff label{display:block;font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}.ff label .req{color:var(--rd);margin-left:2px}.ff input,.ff select,.ff textarea{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:var(--r8);font-size:13px;background:var(--sf);color:var(--tx);font-family:inherit;outline:none}.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--bl);box-shadow:0 0 0 3px rgba(59,110,246,.1)}.ff textarea{resize:vertical;min-height:58px;line-height:1.5}.ff .hint{font-size:11px;color:var(--tx3);margin-top:3px}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:11px}.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+.pk{border:1px solid var(--bd);border-radius:var(--r8);overflow:hidden;max-height:155px;overflow-y:auto}.pk-i{display:flex;align-items:center;gap:9px;padding:8px 11px;cursor:pointer;border-bottom:1px solid var(--bd)}.pk-i:last-child{border-bottom:none}.pk-i:hover{background:var(--s2)}.pk-i.pk-sel{background:var(--bl-l)}.pk-i input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--bl);flex-shrink:0}.pk-n{font-size:12px;font-weight:700}.pk-s{font-size:11px;color:var(--tx3)}
+.req-note{background:var(--rd-l);border:1px solid var(--rd-m);border-radius:var(--r8);padding:8px 12px;font-size:12px;color:var(--rd);font-weight:600;margin-bottom:11px}
+.sdiv{height:1px;background:var(--bd);margin:12px 0}.sr{display:flex;align-items:center;gap:9px;margin-bottom:9px}.sr label{width:100px;font-size:12px;font-weight:700;color:var(--tx2);flex-shrink:0}.sr input{flex:1;padding:7px 10px;border:1px solid var(--bd);border-radius:var(--r8);font-size:13px;font-family:inherit;outline:none}
+.s-ok{background:var(--gn-l);color:var(--gn);padding:7px 11px;border-radius:var(--r8);font-size:12px;font-weight:600;margin-top:7px}.s-err{background:var(--rd-l);color:var(--rd);padding:7px 11px;border-radius:var(--r8);font-size:12px;font-weight:600;margin-top:7px}
+.es{text-align:center;padding:40px 20px;color:var(--tx3)}.es-i{font-size:32px;margin-bottom:10px}.es-t{font-size:14px;font-weight:700;color:var(--tx2);margin-bottom:5px}
+a.ml{color:var(--bl);text-decoration:none;font-weight:600}.ml:hover{text-decoration:underline}
+.inbox-badge{background:var(--rd);color:#fff;border-radius:20px;padding:1px 6px;font-size:10px;font-weight:800;margin-left:4px;vertical-align:middle}
+</style></head><body>
+<div id="ps">
+  <div class="pw">
+    <div class="pw-logo">Tonfunk Netzwerk</div>
+    <div class="pw-sub">Hochschul-Kooperation Ermsleben</div>
+    <input class="pw-in" type="password" id="pin-in" placeholder="&#9679;&#9679;&#9679;&#9679;" maxlength="10" onkeydown="if(event.key==='Enter')tryPin()">
+    <div class="pw-err" id="pin-err"></div>
+    <button class="pw-btn pw-p" onclick="tryPin()">Als Redakteur anmelden</button>
+    <button class="pw-btn pw-s" onclick="startAs('reader')">Lesemodus &#246;ffnen</button>
+  </div>
+</div>
+<div id="app" style="display:none;flex-direction:column;height:100vh">
+  <div class="hdr">
+    <div class="hdr-br">Tonfunk Netzwerk</div>
+    <div class="hdr-sp"></div>
+    <div class="hdr-loc">&#128205; Ermsleben &middot; Harz</div>
+    <div class="gsr" style="margin:0 8px">
+      <span class="gsr-i">&#128269;</span>
+      <input id="gsr-in" placeholder="Global suchen&hellip;" oninput="gsrSearch(this.value)" onfocus="if(this.value)showGSR()" onblur="setTimeout(hideGSR,200)">
+      <div class="gsr-res" id="gsr-res"></div>
+    </div>
+    <div class="hdr-r">
+      <div id="reader-btns" style="display:none;gap:6px;margin-right:4px">
+        <button class="btn b-sm" style="background:var(--pu-l);color:var(--pu);border-color:var(--pu-m)" onclick="openIdeaForm()">&#128161; Idee einreichen</button>
+        <button class="btn b-sm" style="background:var(--bl-l);color:var(--bl);border-color:var(--bl-m)" onclick="openContactSuggestForm()">&#128100; Kontakt vorschlagen</button>
+      </div>
+      <div class="sdrow"><span class="sdot" id="sdot"></span><span id="slbl">lokal</span></div>
+      <span class="rtag" id="rtag">Leser</span>
+      <button class="hbtn" onclick="openSettings()">&#9881;</button>
+      <button class="hbtn" onclick="logout()">&#9211;</button>
+    </div>
+  </div>
+  <div class="mtabs">
+    <button class="mt active da" id="mt-da" onclick="setMain('da')">&#128202; Dashboard</button>
+    <button class="mt" id="mt-tf" onclick="setMain('tf')">&#127981; Tonfunk</button>
+    <button class="mt" id="mt-hs" onclick="setMain('hs')">&#127760; Netzwerk</button>
+    <button class="mt" id="mt-ac" onclick="setMain('ac')">&#128260; Aktivit&auml;ten</button>
+    <button class="mt" id="mt-pb" onclick="setMain('pb')" style="display:none">&#128236; Posteingang</button>
+  </div>
+  <div class="stabs" id="stabs" style="display:none">
+    <button class="st active" id="st-a" onclick="setSub('a')">&#128100; Kontakte</button>
+    <button class="st" id="st-b" onclick="setSub('b')">&#128161; Themenspeicher</button>
+  </div>
+  <div class="layout" style="flex:1;overflow:hidden;display:flex">
+    <div class="lc" id="lc"></div>
+    <div class="dc" id="dc"></div>
+  </div>
+</div>
+<div class="overlay" id="modal" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="mbox"></div>
+</div>
+<script>
+const PIN='TF2025',JBB='https://api.jsonbin.io/v3/b/';
+let ROLE='reader',MAIN='da',SUB='a',SEL=null;
+let D={tfc:[],hsc:[],tft:[],hst:[],acts:[],pings:[],chron:[],inbox:[]};
+let JBK='',JBI='',ST=null;
+const TFA=['Applikationsentwicklung & Data Analytics','Arbeitsvorbereitung','Azubis','Produktion','Betriebsmittelbau','Buchhaltung','Controlling','Einkauf','Vertrieb','Instandhaltung','Geschaeftsfuehrung','IT-Administration','Konstruktion','Lager','Marketing','HR','Produktionsplanung','Projektmanagement','Prozesstechnik','Prueftechnik','Qualitaet','Versand'];
+const TFS=['Aktiv','Ruhend'];
+const HSI=['Hochschule Merseburg','Hochschule Anhalt','Hochschule Harz','OvGU Magdeburg','Fraunhofer','Berufsschule / BBS','Gymnasium','IHK','HWK','Wirtschaftsfoerderung','Land Sachsen-Anhalt','Bundesministerium','EU-Foerderstelle','Partnerunternehmen','Technologiepartner','Forschungsinstitut','Transferstelle','Medien','Sonstige'];
+const HSR=['Professor/in','Transferbeauftragte/r','Praesidium / Leitung','Mitarbeiter/in','Ausbildungsleitung','Wirtschaftsfoerderung','Geschaeftsfuehrung','Projektleitung','Pressesprecher/in','Politiker/in','Sonstige'];
+const HSS=['Offen','In Kontakt','Aktiv'];
+const TTY=['Abschlussarbeit','Masterarbeit','Praxissemester','Praktikum','Werkstudent','Forschungsprojekt','Kooperation','Weiterbildung','Idee','Sonstige'];
+const TST=['Idee','Offen','In Bearbeitung','Vereinbart','Abgeschlossen'];
+const ATY=['Hochschulbesuch','Kooperation','Abschlussarbeit','Praxissemester','Forschungsprojekt','Foerderantrag','Veranstaltung','Weiterbildung','Klaerungsgespraech','Sonstige'];
+const AST=['Geplant','Laufend','Abgeschlossen'];
+const PR=['Hoch','Mittel','Niedrig'];
+const FCH=['Elektrotechnik','Automatisierungstechnik','Mechatronik','Informatik','Wirtschaftsingenieurwesen','Maschinenbau','Produktionstechnik','Nachhaltigkeit','Sonstige'];
+const HTY=['Praxispartner gesucht','Abschlussarbeiten vergeben','Forschungspartner gesucht','Lehrkooperation','Foerderantrag'];
+const BC={Aktiv:'b-gn','In Kontakt':'b-bl',Laufend:'b-gn',Offen:'b-am',Geplant:'b-bl','In Bearbeitung':'b-bl',Vereinbart:'b-gn',Abgeschlossen:'b-gr',Idee:'b-gr',Ruhend:'b-gr'};
+function bdg(v){return'<span class="badge '+(BC[v]||'b-gr')+'">'+e(v)+'</span>'}
+function bP(v){return'<span class="badge '+({Hoch:'b-rd',Mittel:'b-am',Niedrig:'b-gr'}[v]||'b-gr')+'">'+e(v)+'</span>'}
+function bT(v){return'<span class="badge b-tl">'+e(v)+'</span>'}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function e(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function so(arr,cur,bl){return(bl?'<option value="">'+e(bl)+'</option>':'')+arr.map(o=>'<option'+(cur===o?' selected':'')+'>'+e(o)+'</option>').join('')}
+function today(){return new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})}
+function isEd(){return ROLE==='editor'}
+function tfC(id){return D.tfc.find(c=>c.id===id)}
+function hsC(id){return D.hsc.find(c=>c.id===id)}
+function cN(id){const c=tfC(id)||hsC(id);return c?c.name:'--'}
+function gT(id){return D.tft.find(t=>t.id===id)||D.hst.find(t=>t.id===id)}
+function gPings(t,i){return(D.pings||[]).filter(p=>p.et===t&&p.ei===i)}
+function gChron(aid){return(D.chron||[]).filter(c=>c.aid===aid).sort((a,b)=>b.dt.localeCompare(a.dt))}
+function wvCls(d){if(!d)return'wv-n';const diff=Math.round((new Date(d)-new Date().setHours(0,0,0,0))/86400000);if(diff<0)return'wv-r';if(diff<=7)return'wv-a';return'wv-g'}
+function wvLbl(d){if(!d)return'--';const diff=Math.round((new Date(d)-new Date().setHours(0,0,0,0))/86400000);const fmt=new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});if(diff<0)return'&#9940; '+fmt+' ('+Math.abs(diff)+'d)';if(diff===0)return'&#128308; Heute';if(diff<=7)return'&#128993; '+fmt+' (in '+diff+'d)';return'&#128994; '+fmt}
+function mScore(t,c){let s=0;const tf=((t.tit||'')+(t.desc||'')+(t.fach||'')).toLowerCase();const cf=((c.fb||'')+(c.notiz||'')+(c.inst||'')).toLowerCase();tf.split(/\s+/).filter(w=>w.length>4).forEach(w=>{if(cf.includes(w))s++});if(t.fach&&cf.includes(t.fach.toLowerCase()))s+=3;return Math.min(s,10)}
+function getMatches(t){return D.hsc.map(c=>({c,s:mScore(t,c)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).slice(0,5)}
+function tryPin(){document.getElementById('pin-in').value===PIN?startAs('editor'):(document.getElementById('pin-err').textContent='PIN ungueltig.')}
+function startAs(r){
+  ROLE=r;sessionStorage.setItem('tf_role',r);
+  document.getElementById('ps').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('rtag').textContent=r==='editor'?'Redakteur':'Leser';
+  document.getElementById('rtag').className='rtag '+(r==='editor'?'r-ed':'r-rd');
+  if(r==='editor'){const pb=document.getElementById('mt-pb');if(pb)pb.style.display='flex'}
+  if(r==='reader'){const rb=document.getElementById('reader-btns');if(rb){rb.style.display='flex';rb.style.flexDirection='row'}}
+  JBK=localStorage.getItem('jbk')||'';JBI=localStorage.getItem('jbi')||'';
+  loadL();syncLoad().then(()=>render());
+}
+function logout(){sessionStorage.removeItem('tf_role');location.reload()}
+function loadL(){try{const r=localStorage.getItem('tfnw9');if(r){const p=JSON.parse(r);['tfc','hsc','tft','hst','acts','pings','chron','inbox'].forEach(k=>{D[k]=p[k]||[]})}}catch(x){}}
+function saveL(){try{localStorage.setItem('tfnw9',JSON.stringify(D))}catch(x){}}
+function sched(){saveL();clearTimeout(ST);ST=setTimeout(syncSave,1800)}
+function setSS(s,l){document.getElementById('sdot').className='sdot '+(s==='ok'?'ok':s==='warn'?'warn':s==='err'?'err':'');document.getElementById('slbl').textContent=l}
+async function syncLoad(){if(!JBK||!JBI){setSS('','lokal');return}setSS('warn','laden...');try{const r=await fetch(JBB+JBI+'/latest',{headers:{'X-Master-Key':JBK}});if(!r.ok)throw 0;const j=await r.json();if(j.record){['tfc','hsc','tft','hst','acts','pings','chron','inbox'].forEach(k=>{D[k]=(j.record[k]||[])});saveL()}setSS('ok','JSONbin OK')}catch(x){setSS('err','Sync-Fehler')}}
+async function syncSave(){saveL();if(!JBK||!JBI)return;setSS('warn','speichert...');try{await fetch(JBB+JBI,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':JBK},body:JSON.stringify(D)});setSS('ok','gespeichert')}catch(x){setSS('err','Sync-Fehler')}}
+function setMain(m){
+  MAIN=m;SEL=null;
+  ['da','tf','hs','ac','pb'].forEach(k=>{const b=document.getElementById('mt-'+k);if(b)b.classList.remove('active','hs','act','da','pb')});
+  const cls={da:'da',tf:'',hs:'hs',ac:'act',pb:'pb'};
+  const b=document.getElementById('mt-'+m);if(b)b.classList.add('active',...(cls[m]?[cls[m]]:[]));
+  document.getElementById('stabs').style.display=(m==='tf'||m==='hs')?'flex':'none';
+  const rb=document.getElementById('reader-btns');if(rb)rb.style.display=(ROLE==='reader'&&m!=='pb')?'flex':'none';
+  document.getElementById('dc').classList.remove('show');
+  if(m==='tf'||m==='hs')setSub('a',false);
+  render();
+}
+function setSub(s,doR=true){
+  SUB=s;SEL=null;
+  ['a','b'].forEach(k=>{const el=document.getElementById('st-'+k);if(el){el.classList.remove('active','hs');el.classList.toggle('active',k===s)}});
+  if(MAIN==='hs'){['a','b'].forEach(k=>{const el=document.getElementById('st-'+k);if(el)el.classList.add('hs')})}
+  document.getElementById('dc').classList.remove('show');
+  if(doR)render();
+}
+function getVK(){if(MAIN==='tf')return SUB==='a'?'tc':'tt';if(MAIN==='hs')return SUB==='a'?'hc':'ht';return MAIN}
+function getSF(){return{s:(document.getElementById('sf-s')||{}).value?.toLowerCase()||'',k:(document.getElementById('sf-k')||{}).value||'',st:(document.getElementById('sf-st')||{}).value||''}}
+function gsrSearch(q){
+  const r=document.getElementById('gsr-res');
+  if(!q||q.length<2){r.classList.remove('show');return}
+  const ql=q.toLowerCase();const hits=[];
+  D.tfc.forEach(c=>{if(Object.values(c).join(' ').toLowerCase().includes(ql))hits.push({ty:'tc',ico:'&#128100;',n:c.name,s:c.funk||c.abt,id:c.id})});
+  D.hsc.forEach(c=>{if(Object.values(c).join(' ').toLowerCase().includes(ql))hits.push({ty:'hc',ico:'&#127760;',n:c.name,s:c.inst,id:c.id})});
+  D.tft.forEach(t=>{if(Object.values(t).join(' ').toLowerCase().includes(ql))hits.push({ty:'tt',ico:'&#128161;',n:t.tit,s:t.typ,id:t.id})});
+  D.acts.forEach(a=>{if(Object.values(a).join(' ').toLowerCase().includes(ql))hits.push({ty:'ac',ico:'&#128260;',n:a.tit,s:a.typ,id:a.id})});
+  if(!hits.length){r.innerHTML='<div style="padding:14px 12px;font-size:13px;color:var(--tx3);text-align:center">Keine Treffer</div>';r.classList.add('show');return}
+  const grp={tc:'Tonfunk-Kontakte',hc:'Netzwerk-Kontakte',tt:'Themen Tonfunk',ac:'Aktivitaeten'};
+  let html='';
+  Object.keys(grp).forEach(t=>{const g=hits.filter(h=>h.ty===t);if(!g.length)return;html+='<div class="gsr-grp">'+grp[t]+'</div>';g.slice(0,4).forEach(h=>{html+='<div class="gsr-row" onclick="gsrGo(\''+h.ty+'\',\''+h.id+'\')"><span style="font-size:15px">'+h.ico+'</span><div><div class="gsr-nm">'+e(h.n)+'</div><div class="gsr-sb">'+e(h.s||'')+'</div></div></div>'})});
+  r.innerHTML=html;r.classList.add('show');
+}
+function gsrGo(ty,id){hideGSR();document.getElementById('gsr-in').value='';if(ty==='tc'){setMain('tf');setSub('a',false)}else if(ty==='hc'){setMain('hs');setSub('a',false)}else if(ty==='tt'){setMain('tf');setSub('b',false)}else{setMain('ac')}SEL=id;render();setTimeout(()=>selItem(ty,id),50)}
+function showGSR(){document.getElementById('gsr-res').classList.add('show')}
+function hideGSR(){document.getElementById('gsr-res').classList.remove('show')}
+function render(){
+  const vk=getVK(),lc=document.getElementById('lc');
+  if(MAIN==='da')lc.innerHTML=renderDash();
+  else if(vk==='tc')lc.innerHTML=renderTfC();
+  else if(vk==='hc')lc.innerHTML=renderHsC();
+  else if(vk==='tt')lc.innerHTML=renderTfT();
+  else if(vk==='ht')lc.innerHTML=renderHsT();
+  else if(vk==='ac')lc.innerHTML=renderAct();
+  else if(MAIN==='pb')lc.innerHTML=renderInbox();
+  const pb=document.getElementById('mt-pb');
+  if(pb&&isEd()){const cnt=(D.inbox||[]).length;pb.innerHTML='&#128236; Posteingang'+(cnt>0?' <span class="inbox-badge">'+cnt+'</span>':'')}
+}
+function renderDash(){
+  const now=new Date();now.setHours(0,0,0,0);
+  const ov=D.acts.filter(a=>a.wv&&a.status!=='Abgeschlossen'&&new Date(a.wv)<now);
+  const ds=D.acts.filter(a=>{if(!a.wv||a.status==='Abgeschlossen')return false;const d=Math.round((new Date(a.wv)-now)/86400000);return d>=0&&d<=7});
+  const noC=D.tft.filter(t=>!(t.tids||[]).length);
+  const inbox=(D.inbox||[]).length;
+  return '<div class="d-kpi">'
+    +'<div class="kpi" onclick="setMain(\'tf\');setSub(\'a\')"><div class="kpi-v" style="color:var(--bl)">'+(D.tfc.length+D.hsc.length)+'</div><div class="kpi-l">Kontakte gesamt</div></div>'
+    +'<div class="kpi" onclick="setMain(\'ac\')"><div class="kpi-v" style="color:var(--tl)">'+D.acts.filter(a=>a.status!=='Abgeschlossen').length+'</div><div class="kpi-l">Aktive Aktivitaeten</div></div>'
+    +'<div class="kpi" onclick="setMain(\'tf\');setSub(\'b\')"><div class="kpi-v" style="color:var(--pu)">'+(D.tft.length+D.hst.length)+'</div><div class="kpi-l">Themen gesamt</div></div>'
+    +(isEd()?'<div class="kpi" onclick="setMain(\'pb\')" style="'+(inbox>0?'border-color:var(--rd)':'')+'"><div class="kpi-v" style="color:'+(inbox>0?'var(--rd)':'var(--am)')+'">'+inbox+'</div><div class="kpi-l">&#128236; Posteingang</div></div>':'<div class="kpi"><div class="kpi-v" style="color:var(--am)">'+(D.pings||[]).length+'</div><div class="kpi-l">Pings</div></div>')
+    +'</div><div class="d-grid">'
+    +'<div class="d-card"><div class="d-ct">&#9940; Ueberfaellige Wiedervorlagen ('+ov.length+')</div>'+(ov.length?ov.map(a=>'<div class="d-row" onclick="setMain(\'ac\');selItem(\'ac\',\''+a.id+'\')"><div class="d-dot" style="background:var(--rd)"></div><div><div class="d-t">'+e(a.tit)+'</div><div class="d-s">'+wvLbl(a.wv)+'</div></div></div>').join(''):'<div class="dp-em">Keine ueberfaelligen Eintraege &#127881;</div>')+'</div>'
+    +'<div class="d-card"><div class="d-ct">&#128993; Faellig in 7 Tagen ('+ds.length+')</div>'+(ds.length?ds.map(a=>'<div class="d-row" onclick="setMain(\'ac\');selItem(\'ac\',\''+a.id+'\')"><div class="d-dot" style="background:var(--am)"></div><div><div class="d-t">'+e(a.tit)+'</div><div class="d-s">'+wvLbl(a.wv)+'</div></div></div>').join(''):'<div class="dp-em">Nichts faellig in 7 Tagen</div>')+'</div>'
+    +'<div class="d-card"><div class="d-ct">&#9888; Themen ohne Ansprechpartner ('+noC.length+')</div>'+(noC.length?noC.map(t=>'<div class="d-row" onclick="setMain(\'tf\');setSub(\'b\',false);render();selItem(\'tt\',\''+t.id+'\')"><div class="d-dot" style="background:var(--rd)"></div><div><div class="d-t">'+e(t.tit)+'</div><div class="d-s">'+e(t.typ)+'</div></div></div>').join(''):'<div class="dp-em">Alle Themen haben Ansprechpartner &#10003;</div>')+'</div>'
+    +'<div class="d-card"><div class="d-ct">&#128260; Aktuelle Aktivitaeten</div>'+D.acts.filter(a=>a.status!=='Abgeschlossen').slice(0,5).map(a=>'<div class="d-row" onclick="setMain(\'ac\');selItem(\'ac\',\''+a.id+'\')"><div class="d-dot" style="background:'+(a.status==='Laufend'?'var(--gn)':'var(--bl)')+'"></div><div><div class="d-t">'+e(a.tit)+'</div><div class="d-s">'+e(a.ns||a.zeit||'')+'</div></div></div>').join('')+(D.acts.filter(a=>a.status!=='Abgeschlossen').length===0?'<div class="dp-em">Keine aktiven Aktivitaeten</div>':'')+'</div>'
+    +'<div class="d-card"><div class="d-ct">&#128204; Neueste Pings ('+(D.pings||[]).length+')</div>'+[...(D.pings||[])].reverse().slice(0,5).map(p=>'<div class="d-row"><div class="d-dot" style="background:var(--am)"></div><div><div class="d-t">'+e(p.name)+': '+e((p.text||'').substring(0,50))+((p.text||'').length>50?'...':'')+'</div><div class="d-s">'+e(p.datum)+'</div></div></div>').join('')+((D.pings||[]).length===0?'<div class="dp-em">Keine Pings</div>':'')+'</div>'
+    +'</div>';
+}
+const AVB=['#e0e7ff','#fce7f3','#dcfce7','#fef9c3','#ede9fe','#cffafe','#fee2e2'];
+const AVC=['#4338ca','#be185d','#15803d','#a16207','#7c3aed','#0e7490','#dc2626'];
+function cardActions(ty,id,editFn){return'<div class="c-act" onclick="event.stopPropagation()">'+(isEd()?'<button class="btn b-sm" onclick="'+editFn+'(\''+id+'\')">&#9998;</button><button class="btn b-sm b-d" onclick="delI(\''+ty+'\',\''+id+'\')">&#215;</button>':'')+(ty==='tfc'||ty==='hsc'?'<button class="btn b-sm" style="color:var(--tl)" onclick="event.stopPropagation();expVCard(\''+id+'\')" title="vCard">&#128199;</button>':'')+'<button class="btn b-sm" style="color:var(--am)" onclick="openPing(\''+ty.slice(0,2)+'\',\''+id+'\')">&#128204;</button></div>'}
+function renderTfC(){
+  const {s,k,st}=getSF();
+  const rows=D.tfc.filter(r=>{if(s&&!Object.values(r).join(' ').toLowerCase().includes(s))return false;if(k&&r.abt!==k)return false;if(st&&r.status!==st)return false;return true});
+  return'<div class="stats"><div class="sc"><div class="sc-l">Gesamt</div><div class="sc-v">'+D.tfc.length+'</div></div><div class="sc"><div class="sc-l">Aktiv</div><div class="sc-v">'+D.tfc.filter(c=>c.status==='Aktiv').length+'</div></div><div class="sc"><div class="sc-l">Gefiltert</div><div class="sc-v">'+rows.length+'</div></div></div>'
+    +'<div class="tb"><div class="sb"><span class="sb-i">&#128269;</span><input id="sf-s" placeholder="Suchen..." oninput="render()" value="'+e(getSF().s)+'"></div>'
+    +'<select class="fil" id="sf-k" onchange="render()"><option value="">Alle Abteilungen</option>'+TFA.map(a=>'<option'+(getSF().k===a?' selected':'')+'>'+a+'</option>').join('')+'</select>'
+    +'<select class="fil" id="sf-st" onchange="render()"><option value="">Alle Status</option>'+TFS.map(a=>'<option'+(getSF().st===a?' selected':'')+'>'+a+'</option>').join('')+'</select>'
+    +'<div class="mla">'+(isEd()?'<button class="btn" onclick="openImp()" title="Import">&#128229;</button>':'')+'<button class="btn" onclick="expCSV(\'tf\')" title="CSV">&#128228;</button>'+(isEd()?'<button class="btn b-p" onclick="openTfCF(null)">+ Kontakt</button>':'')+'</div></div>'
+    +(rows.length?'<div class="card-list">'+rows.map((r,i)=>'<div class="card'+(SEL===r.id?' sel':'')+'" onclick="selItem(\'tc\',\''+r.id+'\')">'
+      +'<div class="c-head"><div class="av" style="background:'+AVB[i%7]+';color:'+AVC[i%7]+'">'+e((r.name||'?')[0])+'</div>'
+      +'<div style="flex:1;min-width:0"><div class="c-t">'+e(r.name)+'</div><div class="c-s">'+e(r.funk||'')+(r.abt?' &middot; '+e(r.abt):'')+'</div></div>'
+      +'<div class="c-act" onclick="event.stopPropagation()">'+(isEd()?'<button class="btn b-sm" onclick="openTfCF(\''+r.id+'\')">&#9998;</button><button class="btn b-sm b-d" onclick="delI(\'tfc\',\''+r.id+'\')">&#215;</button>':'')
+      +'<button class="btn b-sm" style="color:var(--tl)" onclick="event.stopPropagation();expVCard(\''+r.id+'\')" title="vCard">&#128199;</button>'
+      +'<button class="btn b-sm" style="color:var(--am)" onclick="openPing(\'tc\',\''+r.id+'\')">&#128204;</button></div></div>'
+      +'<div class="c-foot">'+bdg(r.status)+(r.email?'<a class="btn b-sm b-g" href="mailto:'+e(r.email)+'" onclick="event.stopPropagation()">&#128231; '+e(r.email)+'</a>':'')+(r.tel?'<a class="btn b-sm b-g" href="tel:'+e(r.tel.replace(/\s/g,''))+'" onclick="event.stopPropagation()">&#128222; '+e(r.tel)+'</a>':'')+(gPings('tc',r.id).length?'<span class="badge b-am">&#128204; '+gPings('tc',r.id).length+'</span>':'')+'</div></div>').join('')+'</div>'
+      :'<div class="es"><div class="es-i">&#128100;</div><div class="es-t">Noch keine Kontakte</div><div style="font-size:13px;color:var(--tx3)">Ersten Kontakt anlegen</div></div>');
+}
+function renderHsC(){
+  const {s,k,st}=getSF();
+  const rows=D.hsc.filter(r=>{if(s&&!Object.values(r).join(' ').toLowerCase().includes(s))return false;if(k&&r.inst!==k)return false;if(st&&r.status!==st)return false;return true});
+  return'<div class="stats"><div class="sc"><div class="sc-l">Gesamt</div><div class="sc-v">'+D.hsc.length+'</div></div><div class="sc"><div class="sc-l">In Kontakt</div><div class="sc-v">'+D.hsc.filter(c=>c.status==='In Kontakt').length+'</div></div><div class="sc"><div class="sc-l">Offen</div><div class="sc-v">'+D.hsc.filter(c=>c.status==='Offen').length+'</div></div></div>'
+    +'<div class="tb"><div class="sb"><span class="sb-i">&#128269;</span><input id="sf-s" placeholder="Suchen..." oninput="render()" value="'+e(getSF().s)+'"></div>'
+    +'<select class="fil" id="sf-k" onchange="render()"><option value="">Alle Institutionen</option>'+HSI.map(a=>'<option'+(getSF().k===a?' selected':'')+'>'+a+'</option>').join('')+'</select>'
+    +'<select class="fil" id="sf-st" onchange="render()"><option value="">Alle Status</option>'+HSS.map(a=>'<option'+(getSF().st===a?' selected':'')+'>'+a+'</option>').join('')+'</select>'
+    +'<div class="mla">'+(isEd()?'<button class="btn" onclick="openImp()">&#128229;</button>':'')+'<button class="btn" onclick="expCSV(\'hs\')">&#128228;</button>'+(isEd()?'<button class="btn b-p hs" onclick="openHsCF(null)">+ Kontakt</button>':'')+'</div></div>'
+    +(rows.length?'<div class="card-list">'+rows.map(r=>'<div class="card'+(SEL===r.id?' sel hs':'')+(r.wv&&wvCls(r.wv)==='wv-r'?' ov':r.wv&&wvCls(r.wv)==='wv-a'?' ds':'')+'" onclick="selItem(\'hc\',\''+r.id+'\')">'
+      +'<div class="c-head"><div class="av" style="background:var(--pu-l);color:var(--pu)">'+e((r.name||'?')[0])+'</div>'
+      +'<div style="flex:1;min-width:0"><div class="c-t">'+e(r.name)+'</div><div class="c-s">'+e(r.rolle||'')+' &middot; '+e(r.inst)+'</div>'+(r.fb?'<div class="c-s" style="font-size:11px;color:var(--tx3)">'+e(r.fb)+'</div>':'')+'</div>'
+      +'<div class="c-act" onclick="event.stopPropagation()">'+(isEd()?'<button class="btn b-sm" onclick="openHsCF(\''+r.id+'\')">&#9998;</button><button class="btn b-sm b-d" onclick="delI(\'hsc\',\''+r.id+'\')">&#215;</button>':'')
+      +'<button class="btn b-sm" style="color:var(--tl)" onclick="event.stopPropagation();expVCard(\''+r.id+'\')" title="vCard">&#128199;</button>'
+      +'<button class="btn b-sm" style="color:var(--am)" onclick="openPing(\'hc\',\''+r.id+'\')">&#128204;</button></div></div>'
+      +'<div class="c-foot">'+bdg(r.status)+(r.wv?'<span class="'+wvCls(r.wv)+'" style="font-size:11px">'+wvLbl(r.wv)+'</span>':'')+(r.email?'<a class="btn b-sm b-g" href="mailto:'+e(r.email)+'" onclick="event.stopPropagation()">&#128231; '+e(r.email)+'</a>':'')+(r.tel?'<a class="btn b-sm b-g" href="tel:'+e(r.tel.replace(/\s/g,''))+'" onclick="event.stopPropagation()">&#128222; '+e(r.tel)+'</a>':'')+(gPings('hc',r.id).length?'<span class="badge b-am">&#128204; '+gPings('hc',r.id).length+'</span>':'')+'</div></div>').join('')+'</div>'
+      :'<div class="es"><div class="es-i">&#127760;</div><div class="es-t">Noch keine Netzwerk-Kontakte</div></div>');
+}
+function renderTfT(){
+  const {s,k,st}=getSF();
+  const rows=D.tft.filter(r=>{if(s&&!Object.values(r).join(' ').toLowerCase().includes(s))return false;if(k&&r.typ!==k)return false;if(st&&r.status!==st)return false;return true});
+  return'<div class="stats"><div class="sc"><div class="sc-l">Gesamt</div><div class="sc-v">'+D.tft.length+'</div></div><div class="sc"><div class="sc-l">Prio Hoch</div><div class="sc-v">'+D.tft.filter(t=>t.prio==='Hoch').length+'</div></div><div class="sc"><div class="sc-l">Offen</div><div class="sc-v">'+D.tft.filter(t=>t.status==='Offen').length+'</div></div></div>'
+    +'<div class="tb"><div class="sb"><span class="sb-i">&#128269;</span><input id="sf-s" placeholder="Suchen..." oninput="render()" value="'+e(getSF().s)+'"></div>'
+    +'<select class="fil" id="sf-k" onchange="render()"><option value="">Alle Typen</option>'+TTY.map(a=>'<option'+(getSF().k===a?' selected':'')+'>'+a+'</option>').join('')+'</select>'
+    +'<select class="fil" id="sf-st" onchange="render()"><option value="">Alle Status</option>'+TST.map(a=>'<option'+(getSF().st===a?' selected':'')+'>'+a+'</option>').join('')+'</select>'
+    +'<div class="mla">'+(isEd()?'<button class="btn b-p" onclick="openTfTF(null)">+ Thema</button>':'')+'</div></div>'
+    +(rows.length?'<div class="card-list">'+rows.map(r=>'<div class="card'+(SEL===r.id?' sel':'')+'" onclick="selItem(\'tt\',\''+r.id+'\')">'
+      +'<div class="c-head"><div style="flex:1;min-width:0"><div class="c-t">'+e(r.tit)+'</div><div class="c-s">'+e(r.fach||'')+(r.zeit?' &middot; '+e(r.zeit):'')+'</div></div>'
+      +'<div class="c-act" onclick="event.stopPropagation()">'+(isEd()?'<button class="btn b-sm b-pro" onclick="promote(\''+r.id+'\',\'tf\')">&#8594; Aktivitaet</button><button class="btn b-sm" onclick="openTfTF(\''+r.id+'\')">&#9998;</button><button class="btn b-sm b-d" onclick="delI(\'tft\',\''+r.id+'\')">&#215;</button>':'')
+      +'<button class="btn b-sm" style="color:var(--am)" onclick="openPing(\'tt\',\''+r.id+'\')">&#128204;</button></div></div>'
+      +'<div class="c-foot">'+bT(r.typ)+bP(r.prio)+bdg(r.status)+(r.tids||[]).map(id=>'<span class="chip" onclick="event.stopPropagation();selItem(\'tc\',\''+id+'\')">'+e(cN(id))+'</span>').join('')+(!(r.tids||[]).length?'<span class="badge b-rd">&#9888; Kein Ansprechpartner</span>':'')+'</div></div>').join('')+'</div>'
+      :'<div class="es"><div class="es-i">&#128161;</div><div class="es-t">Noch keine Themen</div></div>');
+}
+function renderHsT(){
+  const {s,k,st}=getSF();
+  const rows=D.hst.filter(r=>{if(s&&!Object.values(r).join(' ').toLowerCase().includes(s))return false;if(k&&r.typ!==k)return false;if(st&&r.status!==st)return false;return true});
+  return'<div class="stats"><div class="sc"><div class="sc-l">Gesamt</div><div class="sc-v">'+D.hst.length+'</div></div><div class="sc"><div class="sc-l">In Bearbeitung</div><div class="sc-v">'+D.hst.filter(t=>t.status==='In Bearbeitung').length+'</div></div></div>'
+    +'<div class="tb"><div class="sb"><span class="sb-i">&#128269;</span><input id="sf-s" placeholder="Suchen..." oninput="render()" value="'+e(getSF().s)+'"></div>'
+    +'<select class="fil" id="sf-k" onchange="render()"><option value="">Alle Typen</option>'+HTY.map(a=>'<option'+(getSF().k===a?' selected':'')+'>'+a+'</option>').join('')+'</select>'
+    +'<select class="fil" id="sf-st" onchange="render()"><option value="">Alle Status</option>'+TST.map(a=>'<option'+(getSF().st===a?' selected':'')+'>'+a+'</option>').join('')+'</select>'
+    +'<div class="mla">'+(isEd()?'<button class="btn b-p hs" onclick="openHsTF(null)">+ Bedarf</button>':'')+'</div></div>'
+    +(rows.length?'<div class="card-list">'+rows.map(r=>'<div class="card'+(SEL===r.id?' sel hs':'')+'" onclick="selItem(\'ht\',\''+r.id+'\')">'
+      +'<div class="c-head"><div style="flex:1;min-width:0"><div class="c-t">'+e(r.hs)+'</div><div class="c-s">'+e(r.typ||'')+' &middot; '+e(r.fb||'')+'</div></div>'
+      +'<div class="c-act" onclick="event.stopPropagation()">'+(isEd()?'<button class="btn b-sm" onclick="openHsTF(\''+r.id+'\')">&#9998;</button><button class="btn b-sm b-d" onclick="delI(\'hst\',\''+r.id+'\')">&#215;</button>':'')
+      +'<button class="btn b-sm" style="color:var(--am)" onclick="openPing(\'ht\',\''+r.id+'\')">&#128204;</button></div></div>'
+      +'<div class="c-foot">'+bdg(r.status)+bP(r.prio)+(r.aids||[]).map(id=>'<span class="chip hs" onclick="event.stopPropagation();selItem(\'hc\',\''+id+'\')">'+e(cN(id))+'</span>').join('')+'</div></div>').join('')+'</div>'
+      :'<div class="es"><div class="es-i">&#127979;</div><div class="es-t">Noch keine Bedarfe</div></div>');
+}
+function renderAct(){
+  const {s,k,st}=getSF();
+  const rows=D.acts.filter(r=>{if(s&&!Object.values(r).join(' ').toLowerCase().includes(s))return false;if(k&&r.typ!==k)return false;if(st&&r.status!==st)return false;return true});
+  return'<div class="stats"><div class="sc"><div class="sc-l">Gesamt</div><div class="sc-v">'+D.acts.length+'</div></div><div class="sc"><div class="sc-l">Geplant</div><div class="sc-v">'+D.acts.filter(a=>a.status==='Geplant').length+'</div></div><div class="sc"><div class="sc-l">Laufend</div><div class="sc-v">'+D.acts.filter(a=>a.status==='Laufend').length+'</div></div></div>'
+    +'<div class="tb"><div class="sb"><span class="sb-i">&#128269;</span><input id="sf-s" placeholder="Suchen..." oninput="render()" value="'+e(getSF().s)+'"></div>'
+    +'<select class="fil" id="sf-k" onchange="render()"><option value="">Alle Typen</option>'+ATY.map(a=>'<option'+(getSF().k===a?' selected':'')+'>'+a+'</option>').join('')+'</select>'
+    +'<select class="fil" id="sf-st" onchange="render()"><option value="">Alle Status</option>'+AST.map(a=>'<option'+(getSF().st===a?' selected':'')+'>'+a+'</option>').join('')+'</select>'
+    +'<div class="mla">'+(isEd()?'<button class="btn b-p act" onclick="openActF(null,null)">+ Aktivitaet</button>':'')+'</div></div>'
+    +(rows.length?'<div class="card-list">'+rows.map(r=>'<div class="card'+(SEL===r.id?' sel act':'')+(r.wv&&wvCls(r.wv)==='wv-r'?' ov':r.wv&&wvCls(r.wv)==='wv-a'?' ds':'')+'" onclick="selItem(\'ac\',\''+r.id+'\')">'
+      +'<div class="c-head"><div style="flex:1;min-width:0"><div class="c-t">'+e(r.tit)+'</div><div class="c-s">'+e(r.typ||'')+(r.zeit?' &middot; '+e(r.zeit):'')+'</div>'+(r.ns?'<div class="c-s" style="color:var(--rd);font-size:11px">&#8594; '+e(r.ns)+'</div>':'')+'</div>'
+      +'<div class="c-act" onclick="event.stopPropagation()">'+(isEd()?'<button class="btn b-sm" onclick="openActF(\''+r.id+'\',null)">&#9998;</button><button class="btn b-sm b-d" onclick="delI(\'acts\',\''+r.id+'\')">&#215;</button>':'')
+      +'<button class="btn b-sm" style="color:var(--am)" onclick="openPing(\'ac\',\''+r.id+'\')">&#128204;</button></div></div>'
+      +'<div class="c-foot">'+bdg(r.status)+bP(r.prio)+(r.wv?'<span class="'+wvCls(r.wv)+'" style="font-size:11px">'+wvLbl(r.wv)+'</span>':'')+(r.tids||[]).map(id=>'<span class="chip" onclick="event.stopPropagation();selItem(\'tc\',\''+id+'\')">'+e(cN(id))+'</span>').join('')+(r.hids||[]).map(id=>'<span class="chip hs" onclick="event.stopPropagation();selItem(\'hc\',\''+id+'\')">'+e(cN(id))+'</span>').join('')+(gPings('ac',r.id).length?'<span class="badge b-am">&#128204; '+gPings('ac',r.id).length+'</span>':'')+(gChron(r.id).length?'<span class="badge b-tl">&#128203; '+gChron(r.id).length+'</span>':'')+'</div></div>').join('')+'</div>'
+      :'<div class="es"><div class="es-i">&#128260;</div><div class="es-t">Noch keine Aktivitaeten</div></div>');
+}
+function renderInbox(){
+  const items=D.inbox||[];
+  const ideas=items.filter(x=>x.kind==='idea');
+  const contacts=items.filter(x=>x.kind==='contact');
+  let html='<div class="stats"><div class="sc"><div class="sc-l">Gesamt</div><div class="sc-v">'+items.length+'</div></div><div class="sc"><div class="sc-l">Ideen</div><div class="sc-v">'+ideas.length+'</div></div><div class="sc"><div class="sc-l">Kontaktvorschlaege</div><div class="sc-v">'+contacts.length+'</div></div></div>';
+  if(!items.length)return html+'<div class="es"><div class="es-i">&#128236;</div><div class="es-t">Posteingang leer</div><div style="font-size:13px;color:var(--tx3)">Eingereichte Ideen und Kontaktvorschlaege erscheinen hier</div></div>';
+  if(ideas.length){html+='<div style="font-size:12px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:8px">&#128161; Ideen ('+ideas.length+')</div><div class="card-list" style="margin-bottom:16px">'+ideas.map(it=>'<div class="card"><div class="c-head"><div style="flex:1;min-width:0"><div class="c-t">'+e(it.tit)+'</div><div class="c-s">von <strong>'+e(it.wer)+'</strong> &middot; '+e(it.datum)+' &middot; '+e(it.typ||'')+' &middot; '+e(it.fach||'')+'</div></div></div>'+(it.desc?'<div style="font-size:12px;color:var(--tx2);margin:6px 0;line-height:1.5">'+e(it.desc)+'</div>':'')+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn b-p" style="font-size:12px;padding:5px 12px" onclick="approveIdea(\''+it.id+'\')">&#10003; In Themenspeicher</button><button class="btn b-d" style="font-size:12px;padding:5px 12px;border:1px solid var(--rd-m)" onclick="rejectInbox(\''+it.id+'\')">&#10005; Ablehnen</button></div></div>').join('')+'</div>'}
+  if(contacts.length){html+='<div style="font-size:12px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:8px">&#128100; Kontaktvorschlaege ('+contacts.length+')</div><div class="card-list">'+contacts.map(it=>'<div class="card"><div class="c-head"><div class="av" style="background:var(--pu-l);color:var(--pu)">'+e((it.name||'?')[0])+'</div><div style="flex:1;min-width:0"><div class="c-t">'+e(it.name)+'</div><div class="c-s">'+e(it.rolle||'')+(it.inst?' &middot; '+e(it.inst):'')+'</div></div></div><div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px"><div><span style="color:var(--tx3);font-weight:600">E-Mail:</span> '+e(it.email||'--')+'</div><div><span style="color:var(--tx3);font-weight:600">Tel:</span> '+e(it.tel||'--')+'</div><div><span style="color:var(--tx3);font-weight:600">Fachbereich:</span> '+e(it.fb||'--')+'</div><div><span style="color:var(--tx3);font-weight:600">Von:</span> '+e(it.wer||'--')+'</div></div>'+(it.relevanz?'<div style="font-size:12px;color:var(--tx2);margin-top:6px;font-style:italic">'+e(it.relevanz)+'</div>':'')+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn b-p hs" style="font-size:12px;padding:5px 12px" onclick="approveContact(\''+it.id+'\')">&#10003; Als Kontakt uebernehmen</button><button class="btn b-d" style="font-size:12px;padding:5px 12px;border:1px solid var(--rd-m)" onclick="rejectInbox(\''+it.id+'\')">&#10005; Ablehnen</button></div></div>').join('')+'</div>'}
+  return html;
+}
+function selItem(ty,id){
+  SEL=id;document.getElementById('dc').classList.add('show');
+  if(ty==='tc')dTfC(id);else if(ty==='hc')dHsC(id);
+  else if(ty==='tt')dTfT(id);else if(ty==='ht')dHsT(id);
+  else if(ty==='ac')dAct(id);
+  if(ty==='tc'&&(MAIN!=='tf'||SUB!=='a')){setMain('tf');setSub('a',false)}
+  if(ty==='hc'&&(MAIN!=='hs'||SUB!=='a')){setMain('hs');setSub('a',false)}
+  if(ty==='tt'&&(MAIN!=='tf'||SUB!=='b')){setMain('tf');setSub('b',false)}
+  if(ty==='ht'&&(MAIN!=='hs'||SUB!=='b')){setMain('hs');setSub('b',false)}
+  if(ty==='ac'&&MAIN!=='ac')setMain('ac');
+  render();
+}
+function closeDp(){SEL=null;document.getElementById('dc').classList.remove('show');render()}
+function dpH(title,sub,editFn,vcFn){
+  return'<div class="dp-sticky"><div class="dp-hc"><div class="dp-t">'+e(title)+'</div>'+(sub?'<div class="dp-s">'+e(sub)+'</div>':'')+'</div>'+(vcFn?'<button class="hbtn" onclick="'+vcFn+'" title="vCard">&#128199;</button>':'')+(isEd()&&editFn?'<button class="hbtn" onclick="'+editFn+'" title="Bearbeiten">&#9998;</button>':'')+'<button class="dp-cl" onclick="closeDp()">&#10005;</button></div>';
+}
+function pingsSec(t,i){
+  const ps=gPings(t,i);
+  return'<div class="dps"><div class="dps-t">&#128204; Pings ('+ps.length+')</div>'+ps.map(p=>'<div class="ping-i"><div class="ping-w">'+e(p.name)+'</div><div class="ping-m">'+e(p.text)+'</div><div class="ping-d">'+e(p.datum)+'</div></div>').join('')+'<button class="ping-btn" onclick="openPing(\''+t+'\',\''+i+'\')">+ Ping</button></div>';
+}
+function dokSec(ent,id,col){
+  const lks=(ent.dok||[]);
+  if(!isEd()&&!lks.length)return'';
+  const tyMap={tfc:'tc',hsc:'hc',tft:'tt',hst:'ht',acts:'ac'};
+  return'<div class="dps"><div class="dps-t">&#128206; Dokumente / Links ('+lks.length+')</div>'+lks.map((d,i)=>'<div class="doc-i"><a href="'+e(d.url)+'" target="_blank">'+e(d.lbl||d.url)+'</a><span class="doc-d">'+e(d.desc||'')+'</span>'+(isEd()?'<button class="btn b-sm b-d" onclick="rmDoc(\''+col+'\',\''+id+'\','+i+')">&#215;</button>':'')+'</div>').join('')+(isEd()?'<button class="btn b-sm" onclick="addDoc(\''+col+'\',\''+id+'\')">+ Link</button>':'')+'</div>';
+}
+function shSec(aid){
+  const h=(D.chron||[]).filter(c=>c.aid===aid&&c.ty==='status');
+  if(!h.length)return'';
+  return'<div class="dps"><div class="dps-t">&#128202; Statushistorie</div>'+h.map(x=>'<div class="sh-i"><span class="sh-d">'+e(x.dt)+'</span><span>'+e(x.txt)+'</span></div>').join('')+'</div>';
+}
+function lnk(n,s,col,oc){return'<div class="dp-lnk" onclick="'+oc+'"><div class="dp-lnk-d" style="background:'+col+'"></div><div><div class="dp-lnk-n">'+e(n)+'</div>'+(s?'<div class="dp-lnk-s">'+e(s)+'</div>':'')+'</div></div>'}
+function dTfC(id){
+  const c=D.tfc.find(x=>x.id===id);if(!c)return;
+  const themes=D.tft.filter(t=>(t.tids||[]).includes(id));
+  const acts=D.acts.filter(a=>(a.tids||[]).includes(id));
+  document.getElementById('dc').innerHTML=dpH(c.name,(c.funk||'')+(c.abt?' \u00b7 '+c.abt:''),"openTfCF('"+id+"')","expVCard('"+id+"')")
+    +'<div class="dps"><div class="dp-g2"><div class="dpf"><div class="dpf-l">Status</div><div class="dpf-v">'+bdg(c.status)+'</div></div><div class="dpf"><div class="dpf-l">Abteilung</div><div class="dpf-v">'+e(c.abt||'--')+'</div></div></div>'
+    +'<div class="dpf"><div class="dpf-l">E-Mail</div><div class="dpf-v">'+(c.email?'<a class="ml" href="mailto:'+e(c.email)+'">'+e(c.email)+'</a>':'--')+'</div></div>'
+    +'<div class="dpf"><div class="dpf-l">Telefon</div><div class="dpf-v">'+(c.tel?'<a class="ml" href="tel:'+e(c.tel.replace(/\s/g,''))+'">'+e(c.tel)+'</a>':'--')+'</div></div>'
+    +(c.wv?'<div class="dpf"><div class="dpf-l">Wiedervorlage</div><div class="dpf-v '+wvCls(c.wv)+'">'+wvLbl(c.wv)+'</div></div>':'')+'</div>'
+    +(c.notiz?'<div class="dps"><div class="dps-t">Notizen</div><div class="dpf-v" style="font-size:13px;line-height:1.6;color:var(--tx2)">'+e(c.notiz)+'</div></div>':'')
+    +'<div class="dps"><div class="dps-t">Verknuepfte Themen ('+themes.length+')</div>'+themes.map(t=>lnk(t.tit,t.typ,'var(--bl)',"selItem('tt','"+t.id+"')")).join('')+(themes.length?'':'<div class="dp-em">Keine</div>')+'</div>'
+    +'<div class="dps"><div class="dps-t">Verknuepfte Aktivitaeten ('+acts.length+')</div>'+acts.map(a=>lnk(a.tit,a.typ,'var(--tl)',"selItem('ac','"+a.id+"')")).join('')+(acts.length?'':'<div class="dp-em">Keine</div>')+'</div>'
+    +pingsSec('tc',id);
+}
+function dHsC(id){
+  const c=D.hsc.find(x=>x.id===id);if(!c)return;
+  const themes=[...D.tft.filter(t=>(t.hids||[]).includes(id)),...D.hst.filter(t=>(t.aids||[]).includes(id))];
+  const acts=D.acts.filter(a=>(a.hids||[]).includes(id));
+  document.getElementById('dc').innerHTML=dpH(c.name,(c.rolle||'')+' \u00b7 '+c.inst,"openHsCF('"+id+"')","expVCard('"+id+"')")
+    +'<div class="dps"><div class="dp-g2"><div class="dpf"><div class="dpf-l">Status</div><div class="dpf-v">'+bdg(c.status)+'</div></div><div class="dpf"><div class="dpf-l">Fachbereich</div><div class="dpf-v" style="font-size:12px">'+e(c.fb||'--')+'</div></div></div>'
+    +'<div class="dpf"><div class="dpf-l">E-Mail</div><div class="dpf-v">'+(c.email?'<a class="ml" href="mailto:'+e(c.email)+'">'+e(c.email)+'</a>':'--')+'</div></div>'
+    +'<div class="dpf"><div class="dpf-l">Telefon</div><div class="dpf-v">'+(c.tel?'<a class="ml" href="tel:'+e(c.tel.replace(/\s/g,''))+'">'+e(c.tel)+'</a>':'--')+'</div></div>'
+    +(c.adr?'<div class="dpf"><div class="dpf-l">Adresse</div><div class="dpf-v" style="font-size:12px;line-height:1.5">'+e(c.adr)+'</div></div>':'')
+    +(c.wv?'<div class="dpf"><div class="dpf-l">Wiedervorlage</div><div class="dpf-v '+wvCls(c.wv)+'">'+wvLbl(c.wv)+'</div></div>':'')+'</div>'
+    +(c.notiz?'<div class="dps"><div class="dps-t">Notizen</div><div class="dpf-v" style="font-size:13px;line-height:1.6;color:var(--tx2)">'+e(c.notiz)+'</div></div>':'')
+    +'<div class="dps"><div class="dps-t">Verknuepfte Themen ('+themes.length+')</div>'+themes.map(t=>lnk(t.tit||t.hs,t.typ||t.fb,'var(--pu)',"selItem('"+(t.hs?'ht':'tt')+"','"+t.id+"')")).join('')+(themes.length?'':'<div class="dp-em">Keine</div>')+'</div>'
+    +'<div class="dps"><div class="dps-t">Verknuepfte Aktivitaeten ('+acts.length+')</div>'+acts.map(a=>lnk(a.tit,a.typ,'var(--tl)',"selItem('ac','"+a.id+"')")).join('')+(acts.length?'':'<div class="dp-em">Keine</div>')+'</div>'
+    +dokSec(c,id,'hsc')+pingsSec('hc',id);
+}
+function dTfT(id){
+  const t=D.tft.find(x=>x.id===id);if(!t)return;
+  const acts=D.acts.filter(a=>(a.thids||[]).includes(id));
+  const matches=getMatches(t);
+  document.getElementById('dc').innerHTML=dpH(t.tit,(t.typ||'')+' \u00b7 '+(t.fach||''),"openTfTF('"+id+"')")
+    +'<div class="dps"><div class="dp-g2"><div class="dpf"><div class="dpf-l">Prioritaet</div><div class="dpf-v">'+bP(t.prio)+'</div></div><div class="dpf"><div class="dpf-l">Status</div><div class="dpf-v">'+bdg(t.status)+'</div></div></div>'
+    +'<div class="dpf"><div class="dpf-l">Zeitraum</div><div class="dpf-v" style="font-size:12px">'+e(t.zeit||'--')+'</div></div></div>'
+    +(t.desc?'<div class="dps"><div class="dps-t">Beschreibung</div><div class="dpf-v" style="font-size:12px;line-height:1.7;white-space:pre-wrap">'+e(t.desc)+'</div></div>':'')
+    +'<div class="dps"><div class="dps-t">Tonfunk-Ansprechpartner</div>'+(t.tids||[]).map(i=>{const c=tfC(i);return c?lnk(c.name,c.funk,'var(--bl)',"selItem('tc','"+i+"')"):'';}).join('')+(!(t.tids||[]).length?'<div class="dp-em" style="color:var(--rd)">&#9888; Kein Ansprechpartner</div>':'')+'</div>'
+    +'<div class="dps"><div class="dps-t">Aktivitaeten ('+acts.length+')</div>'+acts.map(a=>lnk(a.tit,a.typ,'var(--tl)',"selItem('ac','"+a.id+"')")).join('')+(acts.length?'':'<div class="dp-em">Noch keine - <span style="color:var(--gn);cursor:pointer;font-weight:600" onclick="promote(\''+id+'\',\'tf\')">&#8594; jetzt anlegen</span></div>')+'</div>'
+    +'<div class="dps"><div class="dps-t">&#129309; Passende Netzwerk-Kontakte</div>'+(matches.length?matches.map(({c,s})=>'<div class="match-i" onclick="selItem(\'hc\',\''+c.id+'\')"><div class="match-sc" style="background:'+(s>=7?'var(--gn-l)':s>=4?'var(--am-l)':'var(--s2)')+';color:'+(s>=7?'var(--gn)':s>=4?'var(--am)':'var(--tx3)')+'">'+s+'</div><div><div class="dp-lnk-n">'+e(c.name)+'</div><div class="dp-lnk-s">'+e(c.inst)+' \u00b7 '+e(c.fb||'')+'</div></div></div>').join(''):'<div class="dp-em">Keine Treffer</div>')+'</div>'
+    +dokSec(t,id,'tft')+pingsSec('tt',id);
+}
+function dHsT(id){
+  const t=D.hst.find(x=>x.id===id);if(!t)return;
+  document.getElementById('dc').innerHTML=dpH(t.hs,t.typ,"openHsTF('"+id+"')")
+    +'<div class="dps"><div class="dp-g2"><div class="dpf"><div class="dpf-l">Prioritaet</div><div class="dpf-v">'+bP(t.prio)+'</div></div><div class="dpf"><div class="dpf-l">Status</div><div class="dpf-v">'+bdg(t.status)+'</div></div></div>'
+    +'<div class="dpf"><div class="dpf-l">Fachbereich</div><div class="dpf-v" style="font-size:12px">'+e(t.fb||'--')+'</div></div>'
+    +'<div class="dpf"><div class="dpf-l">Beschreibung</div><div class="dpf-v" style="font-size:12px;line-height:1.6">'+e(t.desc||'--')+'</div></div>'
+    +(t.notiz?'<div class="dpf"><div class="dpf-l">Notiz</div><div class="dpf-v" style="font-size:12px;font-style:italic;color:var(--tx2)">'+e(t.notiz)+'</div></div>':'')+'</div>'
+    +'<div class="dps"><div class="dps-t">Ansprechpartner</div>'+(t.aids||[]).map(i=>{const c=hsC(i);return c?lnk(c.name,c.rolle+' \u00b7 '+c.inst,'var(--pu)',"selItem('hc','"+i+"')"):'';}).join('')+(!(t.aids||[]).length?'<div class="dp-em">Kein Ansprechpartner</div>':'')+'</div>'
+    +dokSec(t,id,'hst')+pingsSec('ht',id);
+}
+function dAct(id){
+  const a=D.acts.find(x=>x.id===id);if(!a)return;
+  const themes=(a.thids||[]).map(gT).filter(Boolean);
+  const chron=gChron(id).filter(c=>c.ty!=='status');
+  document.getElementById('dc').innerHTML=dpH(a.tit,(a.typ||'')+' \u00b7 '+(a.zeit||''),"openActF('"+id+"',null)")
+    +'<div class="dps"><div class="dp-g2"><div class="dpf"><div class="dpf-l">Prioritaet</div><div class="dpf-v">'+bP(a.prio)+'</div></div><div class="dpf"><div class="dpf-l">Status</div><div class="dpf-v">'+bdg(a.status)+'</div></div></div>'
+    +(a.wv?'<div class="dpf"><div class="dpf-l">Wiedervorlage</div><div class="dpf-v '+wvCls(a.wv)+'">'+wvLbl(a.wv)+'</div></div>':'')
+    +'<div class="dpf"><div class="dpf-l">Letzter Kontakt</div><div class="dpf-v" style="font-size:12px">'+e(a.lk||'--')+'</div></div>'
+    +(a.ns?'<div class="dpf"><div class="dpf-l">Naechster Schritt</div><div class="dpf-v" style="color:var(--rd);font-weight:600">'+e(a.ns)+'</div></div>':'')
+    +(a.notiz?'<div class="dpf"><div class="dpf-l">Notiz</div><div class="dpf-v" style="font-size:12px;color:var(--tx2);line-height:1.5">'+e(a.notiz)+'</div></div>':'')+'</div>'
+    +'<div class="dps"><div class="dps-t">Tonfunk-Kontakte *</div>'+((a.tids||[]).length?(a.tids||[]).map(i=>{const c=tfC(i);return c?lnk(c.name,c.funk+(c.email?' \u00b7 '+c.email:''),'var(--bl)',"selItem('tc','"+i+"')"):'';}).join(''):'<div class="dp-em" style="color:var(--rd)">&#9888; Kein Tonfunk-Kontakt</div>')+'</div>'
+    +'<div class="dps"><div class="dps-t">Externe Kontakte *</div>'+((a.hids||[]).length?(a.hids||[]).map(i=>{const c=hsC(i);return c?lnk(c.name,c.inst+(c.email?' \u00b7 '+c.email:''),'var(--pu)',"selItem('hc','"+i+"')"):'';}).join(''):'<div class="dp-em" style="color:var(--rd)">&#9888; Kein externer Kontakt</div>')+'</div>'
+    +(themes.length?'<div class="dps"><div class="dps-t">Verknuepfte Themen</div>'+themes.map(t=>lnk(t.tit||t.hs,t.typ||t.fb,'var(--am)',"selItem('"+(t.hs?'ht':'tt')+"','"+t.id+"')")).join('')+'</div>':'')
+    +'<div class="dps"><div class="dps-t">&#128203; Aktivitaeten-Chronik ('+chron.length+')</div>'+chron.map(c=>'<div class="chr-i"><div class="chr-m"><span class="chr-d">'+e(c.dt)+'</span><span class="chr-w">'+e(c.wer)+'</span></div><div class="chr-t">'+e(c.txt)+'</div></div>').join('')+(chron.length?'':'<div class="dp-em">Noch keine Eintraege</div>')+(isEd()?'<div class="chr-form"><input id="chr-wer" placeholder="Dein Name"><textarea id="chr-txt" placeholder="Was wurde besprochen?" rows="3"></textarea><button class="btn b-sm b-p" onclick="addChron(\''+id+'\')">Eintrag</button></div>':'<button class="ping-btn" style="margin-top:8px" onclick="openChrRdr(\''+id+'\')">+ Eintrag als Leser</button>')+'</div>'
+    +shSec(id)+dokSec(a,id,'acts')+pingsSec('ac',id);
+}
+function addChron(aid){const wer=document.getElementById('chr-wer').value.trim();const txt=document.getElementById('chr-txt').value.trim();if(!wer||!txt)return alert('Name und Text erforderlich');if(!D.chron)D.chron=[];D.chron.push({id:uid(),aid,dt:today(),wer,txt,ty:'manual'});sched();dAct(aid)}
+function openChrRdr(aid){openModal('<div class="m-hdr"><div class="m-t">&#128203; Chronik-Eintrag</div><button class="m-cl" onclick="closeModal()">&#10005;</button></div><div class="m-body"><div class="ff"><label>Dein Name <span class="req">*</span></label><input id="cr-w" placeholder="Vorname Nachname"></div><div class="ff"><label>Was wurde besprochen? <span class="req">*</span></label><textarea id="cr-t" style="min-height:80px"></textarea></div></div><div class="m-foot"><button class="btn" onclick="closeModal()">Abbrechen</button><button class="btn b-p" onclick="saveChrRdr(\''+aid+'\')">Speichern</button></div>')}
+function saveChrRdr(aid){const wer=document.getElementById('cr-w').value.trim();const txt=document.getElementById('cr-t').value.trim();if(!wer||!txt)return alert('Alle Felder erforderlich');if(!D.chron)D.chron=[];D.chron.push({id:uid(),aid,dt:today(),wer,txt,ty:'manual'});sched();closeModal();dAct(aid)}
+function addDoc(col,id){openModal('<div class="m-hdr"><div class="m-t">&#128206; Link hinzufuegen</div><button class="m-cl" onclick="closeModal()">&#10005;</button></div><div class="m-body"><div class="ff"><label>URL <span class="req">*</span></label><input id="dl-url" placeholder="https://..."></div><div class="ff"><label>Bezeichnung</label><input id="dl-lbl" placeholder="z.B. Aufgabenstellung"></div><div class="ff"><label>Beschreibung</label><input id="dl-desc" placeholder="z.B. PDF, Mai 2025"></div></div><div class="m-foot"><button class="btn" onclick="closeModal()">Abbrechen</button><button class="btn b-p" onclick="saveDoc(\''+col+'\',\''+id+'\')">Hinzufuegen</button></div>')}
+function saveDoc(col,id){const url=document.getElementById('dl-url').value.trim();if(!url)return alert('URL erforderlich');const lbl=document.getElementById('dl-lbl').value.trim();const desc=document.getElementById('dl-desc').value.trim();const item=D[col].find(x=>x.id===id);if(!item)return;if(!item.dok)item.dok=[];item.dok.push({url,lbl,desc});sched();closeModal();const tyMap={tfc:'tc',hsc:'hc',tft:'tt',hst:'ht',acts:'ac'};selItem(tyMap[col]||'ac',id)}
+function rmDoc(col,id,idx){if(!confirm('Link entfernen?'))return;const item=D[col].find(x=>x.id===id);if(!item||!item.dok)return;item.dok.splice(idx,1);sched();const tyMap={tfc:'tc',hsc:'hc',tft:'tt',hst:'ht',acts:'ac'};selItem(tyMap[col]||'ac',id)}
+function openModal(html){document.getElementById('modal').style.display='flex';document.getElementById('mbox').innerHTML=html}
+function closeModal(){document.getElementById('modal').style.display='none'}
+function mkPk(wid,data,selIds){return'<div class="pk" id="'+wid+'">'+data.map(c=>'<label class="pk-i'+((selIds||[]).includes(c.id)?' pk-sel':'')+'" onclick="event.stopPropagation()"><input type="checkbox" value="'+c.id+'" '+((selIds||[]).includes(c.id)?'checked':'')+' onchange="this.closest(\'.pk-i\').classList.toggle(\'pk-sel\',this.checked)"><div><div class="pk-n">'+e(c.name)+'</div><div class="pk-s">'+e(c.abt||c.inst||'')+'</div></div></label>').join('')+'</div>'}
+function getChk(wid){return[...document.getElementById(wid).querySelectorAll('input[type=checkbox]:checked')].map(i=>i.value)}
+function openTfCF(id){if(!isEd())return;const v=id?D.tfc.find(c=>c.id===id)||{}:{};openModal('<div class="m-hdr"><div class="m-t">'+(id?'Kontakt bearbeiten':'Neuer Tonfunk-Kontakt')+'</div><button class="m-cl" onclick="closeModal()">&#10005;</button></div><div class="m-body"><div class="fg2"><div class="ff"><label>Name <span class="req">*</span></label><input id="f-n" value="'+e(v.name||'')+'"></div><div class="ff"><label>Funktion</label><input id="f-fk" value="'+e(v.funk||'')+'"></div></div><div class="fg2"><div class="ff"><label>Abteilung</label><select id="f-ab">'+so(TFA,v.abt)+'</select></div><div class="ff"><label>Status</label><select id="f-st">'+so(TFS,v.status||'Aktiv')+'</select></div></div><div class="fg2"><div class="ff"><label>E-Mail</label><input id="f-em" type="email" value="'+e(v.email||'')+'"></div><div class="ff"><label>Telefon</label><input id="f-tl" value="'+e(v.tel||'')+'"></div></div><div class="ff"><label>Wiedervorlage</label><input id="f-wv" type="date" value="'+e(v.wv||'')+'"></div><div class="ff"><label>Notizen</label><textarea id="f-no">'+e(v.notiz||'')+'</textarea></div></div><div class="m-foot"><button class="btn" onclick="closeModal()">Abbrechen</button><button class="btn b-p" onclick="saveTfC(\''+( id||'')+'\')">Speichern</button></div>')}
+function saveTfC(id){const name=document.getElementById('f-n').value.trim();if(!name)return alert('Name erforderlich');const obj={id:id||uid(),name,funk:document.getElementById('f-fk').value.trim(),abt:document.getElementById('f-ab').value,status:document.getElementById('f-st').value,email:document.getElementById('f-em').value.trim(),tel:document.getElementById('f-tl').value.trim(),wv:document.getElementById('f-wv').value,notiz:document.getElementById('f-no').value.trim(),dok:(id&&tfC(id)?tfC(id).dok:undefined)||[]};if(id)D.tfc=D.tfc.map(c=>c.id===id?obj:c);else D.tfc.push(obj);sched();closeModal();render();if(SEL===id)dTfC(id)}
+function openHsCF(id){if(!isEd())return;const v=id?D.hsc.find(c=>c.id===id)||{}:{};openModal('<div class="m-hdr"><div class="m-t">'+(id?'Kontakt bearbeiten':'Neuer Netzwerk-Kontakt')+'</div><button class="m-cl" onclick="closeModal()">&#10005;</button></div><div class="m-body"><div class="fg2"><div class="ff"><label>Name <span class="req">*</span></label><input id="f-n" value="'+e(v.name||'')+'"></div><div class="ff"><label>Rolle</label><select id="f-ro">'+so(HSR,v.rolle)+'</select></div></div><div class="fg2"><div class="ff"><label>Institution</label><select id="f-in">'+so(HSI,v.inst)+'</select></div><div class="ff"><label>Status</label><select id="f-st">'+so(HSS,v.status||'Offen')+'</select></div></div><div class="ff"><label>Fachbereich / Schwerpunkte</label><input id="f-fb" value="'+e(v.fb||'')+'"></div><div class="fg2"><div class="ff"><label>E-Mail</label><input id="f-em" type="email" value="'+e(v.email||'')+'"></div><div class="ff"><label>Telefon</label><input id="f-tl" value="'+e(v.tel||'')+'"></div></div><div class="ff"><label>Adresse</label><input id="f-ad" value="'+e(v.adr||'')+'"></div><div class="ff"><label>Wiedervorlage</label><input id="f-wv" type="date" value="'+e(v.wv||'')+'"><div class="hint">Ampel: gruen / gelb (7 Tage) / rot (ueberfaellig)</div></div><div class="ff"><label>Notizen</label><textarea id="f-no">'+e(v.notiz||'')+'</textarea></div></div><div class="m-foot"><button class="btn" onclick="closeModal()">Abbrechen</button><button class="btn b-p hs" onclick="saveHsC(\''+( id||'')+'\')">Speichern</button></div>')}
+function saveHsC(id){const name=document.getElementById('f-n').value.trim();if(!name)return alert('Name erforderlich');const obj={id:id||uid(),name,rolle:document.getElementById('f-ro').value,inst:document.getElementById('f-in').value,status:document.getElementById('f-st').value,fb:document.getElementById('f-fb').value.trim(),email:document.getElementById('f-em').value.trim(),tel:document.getElementById('f-tl').value.trim(),adr:document.getElementById('f-ad').value.trim(),wv:document.getElementById('f-wv').value,notiz:document.getElementById('f-no').value.trim(),dok:(id&&hsC(id)?hsC(id).dok:undefined)||[]};if(id)D.hsc=D.hsc.map(c=>c.id===id?obj:c);else D.hsc.push(obj);sched();closeModal();render();if(SEL===id)dHsC(id)}
+function openTfTF(id){if(!isEd())return;const v=id?D.tft.find(t=>t.id===id)||{}:{};openModal('<div class="m-hdr"><div class="m-t">'+(id?'Thema bearbeiten':'Neues Tonfunk-Thema')+'</div><button class="m-cl" onclick="closeModal()">&#10005;</button></div><div class="m-body"><div class="ff"><label>Titel <span class="req">*</span></label><input id="f-t" value="'+e(v.tit||'')+'"></div><div class="fg3"><div class="ff"><label>Typ</label><select id="f-ty">'+so(TTY,v.typ)+'</select></div><div class="ff"><label>Fachrichtung</label><select id="f-fa">'+so(FCH,v.fach)+'</select></div><div class="ff"><label>Zeitraum</label><input id="f-ze" value="'+e(v.zeit||'')+'"></div></div><div class="fg2"><div class="ff"><label>Prioritaet</label><select id="f-pr">'+so(PR,v.prio)+'</select></div><div class="ff"><label>Status</label><select id="f-st">'+so(TST,v.status)+'</select></div></div><div class="ff"><label>Beschreibung</label><textarea id="f-de" style="min-height:90px">'+e(v.desc||'')+'</textarea></div><div class="sdiv"></div><div class="ff"><label>Tonfunk-Ansprechpartner</label>'+mkPk('pk-tf',D.tfc,v.tids||[])+'</div><div class="ff"><label>Notiz</label><textarea id="f-no">'+e(v.notiz||'')+'</textarea></div></div><div class="m-foot"><button class="btn" onclick="closeModal()">Abbrechen</button><button class="btn b-p" onclick="saveTfT(\''+( id||'')+'\')">Speichern</button></div>')}
+function saveTfT(id){const tit=document.getElementById('f-t').value.trim();if(!tit)return alert('Titel erforderlich');const obj={id:id||uid(),tit,typ:document.getElementById('f-ty').value,fach:document.getElementById('f-fa').value,zeit:document.getElementById('f-ze').value.trim(),prio:document.getElementById('f-pr').value,status:document.getElementById('f-st').value,desc:document.getElementById('f-de').value.trim(),tids:getChk('pk-tf'),notiz:document.getElementById('f-no').value.trim(),dok:(id&&gT(id)?gT(id).dok:undefined)||[]};if(id)D.tft=D.tft.map(t=>t.id===id?obj:t);else D.tft.push(obj);sched();closeModal();render();if(SEL===id)dTfT(id)}
+function openHsTF(id){if(!isEd())return;const v=id?D.hst.find(t=>t.id===id)||{}:{};openModal('<div class="m-hdr"><div class="m-t">'+(id?'Bedarf bearbeiten':'Neuer Netzwerk-Bedarf')+'</div><button class="m-cl" onclick="closeModal()">&#10005;</button></div><div class="m-body"><div class="fg2"><div class="ff"><label>Institution <span class="req">*</span></label><input id="f-hs" value="'+e(v.hs||'')+'"></div><div class="ff"><label>Typ</label><select id="f-ty">'+so(HTY,v.typ)+'</select></div></div><div class="ff"><label>Fachbereich</label><input id="f-fb" value="'+e(v.fb||'')+'"></div><div class="fg2"><div class="ff"><label>Prioritaet</label><select id="f-pr">'+so(PR,v.prio)+'</select></div><div class="ff"><label>Status</label><select id="f-st">'+so(TST,v.status)+'</select></div></div><div class="ff"><label>Beschreibung</label><textarea id="f-de">'+e(v.desc||'')+'</textarea></div><div class="sdiv"></div><div class="ff"><label>Ansprechpartner Netzwerk</label>'+mkPk('pk-hs',D.hsc,v.aids||[])+'</div><div class="ff"><label>Notiz</label><textarea id="f-no">'+e(v.notiz||'')+'</textarea></div></div><div class="m-foot"><button class="btn" onclick="closeModal()">Abbrechen</button><button class="btn b-p hs" onclick="saveHsT(\''+( id||'')+'\')">Speichern</button></div>')}
+function saveHsT(id){const hs=document.getElementById('f-hs').value.trim();if(!hs)return alert('Institution erforderlich');const obj={id:id||uid(),hs,typ:document.getElementById('f-ty').value,fb:document.getElementById('f-fb').value.trim(),prio:document.getElementById('f-pr').value,status:document.getElementById('f-st').value,desc:document.getElementById('f-de').value.trim(),aids:getChk('pk-hs'),notiz:document.getElementById('f-no').value.trim(),dok:(id&&gT(id)?gT(id).dok:undefined)||[]};if(id)D.hst=D.hst.map(t=>t.id===id?obj:t);else D.hst.push(obj);sched();closeModal();render();if(SEL===id)dHsT(id)}
+function openActF(id,pre){if(!isEd())return;const v=id?D.acts.find(a=>a.id===id)||{}:{};const p=pre||{};openModal('<div class="m-hdr"><div class="m-t">'+(id?'Aktivitaet bearbeiten':'Neue Aktivitaet')+'</div><button class="m-cl" onclick="closeModal()">&#10005;</button></div><div class="m-body"><div class="req-note">&#9888; Min. 1 Tonfunk-Kontakt UND min. 1 externer Kontakt erforderlich</div><div class="ff"><label>Titel <span class="req">*</span></label><input id="f-t" value="'+e(v.tit||p.tit||'')+'"></div><div class="fg3"><div class="ff"><label>Typ</label><select id="f-ty">'+so(ATY,v.typ)+'</select></div><div class="ff"><label>Prioritaet</label><select id="f-pr">'+so(PR,v.prio||p.prio||'Hoch')+'</select></div><div class="ff"><label>Status</label><select id="f-st">'+so(AST,v.status)+'</select></div></div><div class="fg2"><div class="ff"><label>Zeitraum</label><input id="f-ze" value="'+e(v.zeit||p.zeit||'')+'"></div><div class="ff"><label>Letzter Kontakt</label><input id="f-lk" value="'+e(v.lk||'')+'"></div></div><div class="ff"><label>Wiedervorlage</label><input id="f-wv" type="date" value="'+e(v.wv||'')+'"><div class="hint">Ampel auf Karte und Dashboard</div></div><div class="sdiv"></div><div class="ff"><label>Tonfunk-Kontakte <span class="req">*</span> (min. 1)</label>'+mkPk('pk-tf',D.tfc,v.tids||p.tids||[])+'</div><div class="ff"><label>Externe Kontakte <span class="req">*</span> (min. 1)</label>'+mkPk('pk-hs',D.hsc,v.hids||p.hids||[])+'</div><div class="ff"><label>Verknuepfte Themen (optional)</label><div class="pk" style="max-height:120px">'+[...D.tft,...D.hst].map(t=>'<label class="pk-i'+((v.thids||p.thids||[]).includes(t.id)?' pk-sel':'')+'" onclick="event.stopPropagation()"><input type="checkbox" value="'+t.id+'" '+((v.thids||p.thids||[]).includes(t.id)?'checked':'')+' onchange="this.closest(\'.pk-i\').classList.toggle(\'pk-sel\',this.checked)"><div><div class="pk-n">'+e(t.tit||t.hs)+'</div><div class="pk-s">'+e(t.typ||t.fb||'')+'</div></div></label>').join('')+'</div></div><div class="sdiv"></div><div class="ff"><label>Naechster Schritt</label><textarea id="f-ns">'+e(v.ns||'')+'</textarea></div><div class="ff"><label>Notiz</label><textarea id="f-no">'+e(v.notiz||p.desc||'')+'</textarea></div></div><div class="m-foot"><button class="btn" onclick="closeModal()">Abbrechen</button><button class="btn b-p act" onclick="saveAct(\''+( id||'')+'\')">Speichern</button></div>')}
+function saveAct(id){const tit=document.getElementById('f-t').value.trim();if(!tit)return alert('Titel erforderlich');const tf=getChk('pk-tf');if(!tf.length)return alert('Mind. 1 Tonfunk-Kontakt erforderlich');const hs=getChk('pk-hs');if(!hs.length)return alert('Mind. 1 externer Kontakt erforderlich');const allCbs=[...document.querySelectorAll('.pk input[type=checkbox]:checked')].map(i=>i.value);const allC=[...D.tfc,...D.hsc].map(c=>c.id);const thids=allCbs.filter(v=>!allC.includes(v));const oldSt=id?D.acts.find(a=>a.id===id)?.status:null;const newSt=document.getElementById('f-st').value;const obj={id:id||uid(),tit,typ:document.getElementById('f-ty').value,prio:document.getElementById('f-pr').value,status:newSt,zeit:document.getElementById('f-ze').value.trim(),lk:document.getElementById('f-lk').value.trim(),wv:document.getElementById('f-wv').value,tids:tf,hids:hs,thids,ns:document.getElementById('f-ns').value.trim(),notiz:document.getElementById('f-no').value.trim(),dok:(id&&D.acts.find(a=>a.id===id)?D.acts.find(a=>a.id===id).dok:undefined)||[]};if(id&&oldSt&&oldSt!==newSt){if(!D.chron)D.chron=[];D.chron.push({id:uid(),aid:id,dt:today(),wer:'System',txt:'Status: '+oldSt+' -> '+newSt,ty:'status'})}if(id)D.acts=D.acts.map(a=>a.id===id?obj:a);else D.acts.push(obj);sched();closeModal();setMain('ac');render();if(SEL===id)dAct(id)}
+function promote(thId,src){if(!isEd())return;const t=(src==='tf'?D.tft:D.hst).find(x=>x.id===thId);openActF(null,{tit:t&&(t.tit||t.hs),prio:t&&t.prio,zeit:t&&t.zeit,desc:t&&t.desc,tids:t&&t.tids||[],hids:t&&t.aids||[],thids:[thId]})}
+function delI(col,id){if(!isEd())return;if(!confirm('Eintrag loeschen?'))return;D[col]=D[col].filter(x=>x.id!==id);if(SEL===id)closeDp();sched();render()}
+function openPing(ty,id){openModal('<div class="m-hdr"><div class="m-t">&#128204; Ping hinterlassen</div><button class="m-cl" onclick="closeModal()">&#10005;</button></div><div class="m-body"><p style="font-size:13px;color:var(--tx2);margin-bottom:14px;line-height:1.5">Sichtbar fuer alle - auch ohne Redakteurs-PIN.</p><div class="ff"><label>Dein Name <span class="req">*</span></label><input id="pg-n" placeholder="Vorname Nachname"></div><div class="ff"><label>Anmerkung <span class="req">*</span></label><textarea id="pg-t" style="min-height:70px" placeholder="Kommentar, Hinweis..."></textarea></div></div><div class="m-foot"><button class="btn" onclick="closeModal()">Abbrechen</button><button class="btn" style="background:var(--am);color:#fff;border-color:var(--am)" onclick="savePing(\''+ty+'\',\''+id+'\')">Ping senden</button></div>')}
+function savePing(ty,id){const name=document.getElementById('pg-n').value.trim();if(!name)return alert('Name erforderlich');const text=document.getElementById('pg-t').value.trim();if(!text)return alert('Anmerkung erforderlich');if(!D.pings)D.pings=[];D.pings.push({id:uid(),et:ty,ei:id,name,text,datum:today()});sched();closeModal();if(SEL===id)selItem(ty,id)}
+function expVCard(id){const c=tfC(id)||hsC(id);if(!c)return;const org=c.inst||'Tonfunk GmbH Ermsleben';const dept=c.abt||c.fb||'';const lines=['BEGIN:VCARD','VERSION:3.0','FN:'+c.name,'N:'+c.name.split(' ').slice(1).join(' ')+';'+c.name.split(' ')[0]+';;;','ORG:'+org+(dept?';'+dept:''),(c.funk||c.rolle)?'TITLE:'+(c.funk||c.rolle):'',c.email?'EMAIL;TYPE=WORK:'+c.email:'',c.tel?'TEL;TYPE=WORK:'+c.tel:'',c.adr?'ADR;TYPE=WORK:;;'+c.adr+';;;;':'',c.notiz?'NOTE:'+c.notiz.replace(/\n/g,'\\n'):'','END:VCARD'].filter(Boolean).join('\r\n');dlF(lines,c.name.replace(/\s+/g,'_')+'.vcf','text/vcard')}
+function expCSV(ty){const data=ty==='tf'?D.tfc:D.hsc;const isTf=ty==='tf';const hdr=isTf?['Name','Funktion','Abteilung','E-Mail','Telefon','Status','Notiz']:['Name','Rolle','Institution','Fachbereich','E-Mail','Telefon','Adresse','Status','Notiz'];const rows=data.map(c=>isTf?[c.name,c.funk||'',c.abt||'',c.email||'',c.tel||'',c.status||'',c.notiz||'']:[c.name,c.rolle||'',c.inst||'',c.fb||'',c.email||'',c.tel||'',c.adr||'',c.status||'',c.notiz||'']);dlF('\uFEFF'+[hdr,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n'),'Kontakte_'+(isTf?'Tonfunk':'Netzwerk')+'_'+today().replace(/\./g,'-')+'.csv','text/csv;charset=utf-8')}
+function dlF(c,f,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:m}));a.download=f;a.click();URL.revokeObjectURL(a.href)}
+function openImp(){openModal('<div class="m-hdr"><div class="m-t">&#128229; Kontakte importieren</div><button class="m-cl" onclick="closeModal()">&#10005;</button></div><div class="m-body"><div style="background:var(--s2);border-radius:var(--r8);padding:11px 13px;font-size:11px;font-family:monospace;color:var(--tx2);margin-bottom:14px;line-height:1.8"><strong>Tonfunk CSV:</strong> Name;Funktion;Abteilung;E-Mail;Telefon;Status;Notiz<br><strong>Netzwerk CSV:</strong> Name;Rolle;Institution;Fachbereich;E-Mail;Telefon;Adresse;Status;Notiz</div><div class="ff"><label>Zielgruppe</label><select id="imp-t"><option value="tf">Tonfunk-Kontakte</option><option value="hs">Netzwerk-Kontakte</option></select></div><div class="ff"><label>Datei (.vcf oder .csv)</label><input type="file" id="imp-f" accept=".vcf,.csv" style="padding:7px;border:1px solid var(--bd);border-radius:var(--r8);width:100%;font-size:13px"></div><div id="imp-prev" style="margin-top:8px"></div></div><div class="m-foot"><button class="btn" onclick="closeModal()">Abbrechen</button><button class="btn b-p" onclick="runImp()">Importieren</button></div>');document.getElementById('imp-f').addEventListener('change',prevImp)}
+function prevImp(){const file=document.getElementById('imp-f').files[0];if(!file)return;const rd=new FileReader();rd.onload=ev=>{const txt=ev.target.result;const tgt=document.getElementById('imp-t').value;const parsed=file.name.toLowerCase().endsWith('.vcf')?parseVCF(txt):parseCSV(txt,tgt);const prev=document.getElementById('imp-prev');if(!parsed.length){prev.innerHTML='<div style="color:var(--rd);font-size:12px">Keine Kontakte erkannt.</div>';return}prev.innerHTML='<div style="background:var(--gn-l);border:1px solid var(--gn-m);border-radius:var(--r8);padding:9px 13px;font-size:12px;color:var(--gn);font-weight:600">&#10003; '+parsed.length+' Kontakt(e) erkannt</div><div style="margin-top:7px;max-height:140px;overflow-y:auto;border:1px solid var(--bd);border-radius:var(--r8)">'+parsed.map(c=>'<div style="padding:6px 11px;border-bottom:1px solid var(--bd);font-size:12px"><strong>'+e(c.name||'--')+'</strong><span style="color:var(--tx3);margin-left:8px">'+e(c.email||c.inst||c.abt||'')+'</span></div>').join('')+'</div>';prev.dataset.parsed=JSON.stringify(parsed)};rd.readAsText(file,'UTF-8')}
+function parseVCF(txt){return txt.split(/BEGIN:VCARD/i).slice(1).map(card=>{const g=k=>{const m=card.match(new RegExp(k+'[^:]*:([^\r\n]+)','i'));return m?m[1].trim():''};return{name:g('FN')||g('N').replace(/;+/g,' ').trim(),funk:g('TITLE'),abt:'',inst:g('ORG').replace(/;/g,' ').trim(),fb:'',email:g('EMAIL'),tel:g('TEL'),adr:g('ADR').replace(/;/g,', ').replace(/^,+|,+$/g,'').trim(),notiz:g('NOTE').replace(/\\n/g,'\n'),status:'Offen',rolle:'Sonstige',dok:[]}}).filter(c=>c.name)}
+function parseCSV(txt,tgt){return txt.replace(/^\uFEFF/,'').split(/\r?\n/).filter(l=>l.trim()&&!l.startsWith('"Name"')&&!l.startsWith('Name')).map(line=>{const c=line.split(';').map(v=>v.replace(/^"|"$/g,'').replace(/""/g,'"').trim());return tgt==='tf'?{name:c[0]||'',funk:c[1]||'',abt:c[2]||'',email:c[3]||'',tel:c[4]||'',status:c[5]||'Offen',notiz:c[6]||'',dok:[]}:{name:c[0]||'',rolle:c[1]||'Sonstige',inst:c[2]||'',fb:c[3]||'',email:c[4]||'',tel:c[5]||'',adr:c[6]||'',status:c[7]||'Offen',notiz:c[8]||'',dok:[]}}).filter(c=>c.name)}
+function runImp(){const prev=document.getElementById('imp-prev');if(!prev?.dataset.parsed){alert('Bitte Datei waehlen');return}const tgt=document.getElementById('imp-t').value;const parsed=JSON.parse(prev.dataset.parsed);let added=0;parsed.forEach(c=>{const obj={...c,id:uid()};tgt==='tf'?D.tfc.push(obj):D.hsc.push(obj);added++});sched();closeModal();if(tgt==='tf'){setMain('tf');setSub('a',false)}else{setMain('hs');setSub('a',false)}render();setTimeout(()=>alert(added+' Kontakt(e) importiert.'),200)}
+function openIdeaForm(){const nameOpts=D.tfc.map(c=>'<option value="'+e(c.name)+'">'+e(c.name)+' ('+e(c.abt||c.funk||'')+')</option>').join('');openModal('<div class="m-hdr"><div class="m-t">&#128161; Neue Idee einreichen</div><button class="m-cl" onclick="closeModal()">&#10005;</button></div><div class="m-body"><p style="font-size:13px;color:var(--tx2);margin-bottom:16px;line-height:1.5">Deine Idee wird ans Redaktionsteam geschickt und nach Pruefung in den Katalog aufgenommen.</p><div class="ff"><label>Dein Name <span class="req">*</span></label><select id="id-wer"><option value="">-- bitte waehlen --</option>'+nameOpts+'<option value="__andere__">Andere Person...</option></select></div><div class="ff" id="id-wer-free" style="display:none"><label>Name eingeben</label><input id="id-wer-txt" placeholder="Vorname Nachname"></div><div class="ff"><label>Thema / Titel <span class="req">*</span></label><input id="id-tit" placeholder="Worum geht es?"></div><div class="fg2"><div class="ff"><label>Typ</label><select id="id-typ"><option value="">-- waehlen --</option>'+['Abschlussarbeit','Masterarbeit','Praxissemester','Praktikum','Werkstudent','Forschungsprojekt','Kooperation','Weiterbildung','Sonstige'].map(t=>'<option>'+t+'</option>').join('')+'</select></div><div class="ff"><label>Fachrichtung</label><select id="id-fach"><option value="">-- waehlen --</option>'+FCH.map(f=>'<option>'+f+'</option>').join('')+'</select></div></div><div class="ff"><label>Beschreibung</label><textarea id="id-desc" style="min-height:90px" placeholder="Hintergrund, Ziel, warum relevant fuer Tonfunk?"></textarea></div><div class="ff"><label>Prioritaet</label><select id="id-prio"><option>Hoch</option><option selected>Mittel</option><option>Niedrig</option></select></div></div><div class="m-foot"><button class="btn" onclick="closeModal()">Abbrechen</button><button class="btn" style="background:linear-gradient(135deg,#3b6ef6,#7c3aed);color:#fff;border:none;font-weight:700;padding:8px 18px;border-radius:8px;cursor:pointer" onclick="submitIdea()">&#128161; Einreichen</button></div>');document.getElementById('id-wer').addEventListener('change',function(){document.getElementById('id-wer-free').style.display=this.value==='__andere__'?'block':'none'})}
+function submitIdea(){const werSel=document.getElementById('id-wer').value;const wer=werSel==='__andere__'?document.getElementById('id-wer-txt').value.trim():werSel;if(!wer)return alert('Bitte Namen auswaehlen');const tit=document.getElementById('id-tit').value.trim();if(!tit)return alert('Bitte ein Thema eingeben');if(!D.inbox)D.inbox=[];D.inbox.push({id:uid(),kind:'idea',wer,tit,typ:document.getElementById('id-typ').value,fach:document.getElementById('id-fach').value,desc:document.getElementById('id-desc').value.trim(),prio:document.getElementById('id-prio').value,datum:today(),status:'neu'});sched();closeModal();const conf=document.createElement('div');conf.style.cssText='position:fixed;bottom:80px;right:24px;background:#16a34a;color:#fff;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:700;z-index:500;box-shadow:0 4px 16px rgba(0,0,0,.2)';conf.textContent='Idee eingereicht - danke!';document.body.appendChild(conf);setTimeout(()=>conf.remove(),3000)}
+function openContactSuggestForm(){const nameOpts=D.tfc.map(c=>'<option value="'+e(c.name)+'">'+e(c.name)+' ('+e(c.abt||c.funk||'')+')</option>').join('');openModal('<div class="m-hdr"><div class="m-t">&#128100; Kontakt vorschlagen</div><button class="m-cl" onclick="closeModal()">&#10005;</button></div><div class="m-body"><p style="font-size:13px;color:var(--tx2);margin-bottom:16px;line-height:1.5">Dein Vorschlag wird ans Redaktionsteam geschickt und nach Pruefung aufgenommen.</p><div class="ff"><label>Dein Name <span class="req">*</span></label><select id="cs-wer"><option value="">-- bitte waehlen --</option>'+nameOpts+'<option value="__andere__">Andere Person...</option></select></div><div class="ff" id="cs-wer-free" style="display:none"><label>Name eingeben</label><input id="cs-wer-txt" placeholder="Vorname Nachname"></div><div class="sdiv"></div><div class="fg2"><div class="ff"><label>Name des Kontakts <span class="req">*</span></label><input id="cs-name" placeholder="Vorname Nachname"></div><div class="ff"><label>Rolle</label><select id="cs-rolle"><option value="">-- waehlen --</option>'+HSR.map(r=>'<option>'+r+'</option>').join('')+'</select></div></div><div class="fg2"><div class="ff"><label>Institution</label><input id="cs-inst" placeholder="z.B. Hochschule Harz, IHK..."></div><div class="ff"><label>Fachbereich</label><input id="cs-fb" placeholder="z.B. Elektrotechnik, BWL"></div></div><div class="fg2"><div class="ff"><label>E-Mail</label><input id="cs-email" type="email" placeholder="name@institution.de"></div><div class="ff"><label>Telefon</label><input id="cs-tel" placeholder="+49 ..."></div></div><div class="ff"><label>Warum relevant fuer Tonfunk?</label><textarea id="cs-rel" style="min-height:70px" placeholder="Kurze Begruendung"></textarea></div></div><div class="m-foot"><button class="btn" onclick="closeModal()">Abbrechen</button><button class="btn" style="background:linear-gradient(135deg,#0891b2,#7c3aed);color:#fff;border:none;font-weight:700;padding:8px 18px;border-radius:8px;cursor:pointer" onclick="submitContact()">&#128100; Einreichen</button></div>');document.getElementById('cs-wer').addEventListener('change',function(){document.getElementById('cs-wer-free').style.display=this.value==='__andere__'?'block':'none'})}
+function submitContact(){const werSel=document.getElementById('cs-wer').value;const wer=werSel==='__andere__'?document.getElementById('cs-wer-txt').value.trim():werSel;if(!wer)return alert('Bitte Namen auswaehlen');const name=document.getElementById('cs-name').value.trim();if(!name)return alert('Bitte einen Kontaktnamen eingeben');if(!D.inbox)D.inbox=[];D.inbox.push({id:uid(),kind:'contact',wer,name,rolle:document.getElementById('cs-rolle').value,inst:document.getElementById('cs-inst').value.trim(),fb:document.getElementById('cs-fb').value.trim(),email:document.getElementById('cs-email').value.trim(),tel:document.getElementById('cs-tel').value.trim(),relevanz:document.getElementById('cs-rel').value.trim(),datum:today(),status:'neu'});sched();closeModal();const conf=document.createElement('div');conf.style.cssText='position:fixed;bottom:80px;right:24px;background:#0891b2;color:#fff;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:700;z-index:500;box-shadow:0 4px 16px rgba(0,0,0,.2)';conf.textContent='Kontaktvorschlag eingereicht - danke!';document.body.appendChild(conf);setTimeout(()=>conf.remove(),3000)}
+function approveIdea(id){const it=D.inbox.find(x=>x.id===id);if(!it)return;D.tft.push({id:uid(),tit:it.tit,typ:it.typ||'Idee',fach:it.fach||'Sonstige',prio:it.prio||'Mittel',status:'Idee',tids:[],zeit:'offen',desc:it.desc||'',notiz:'Eingereicht von '+it.wer+' am '+it.datum,dok:[]});D.inbox=D.inbox.filter(x=>x.id!==id);sched();setMain('tf');setSub('b',false);render();alert('Idee in Tonfunk-Themenspeicher uebernommen.')}
+function approveContact(id){const it=D.inbox.find(x=>x.id===id);if(!it)return;D.hsc.push({id:uid(),name:it.name,rolle:it.rolle||'Sonstige',inst:it.inst||'',fb:it.fb||'',email:it.email||'',tel:it.tel||'',adr:'',wv:'',notiz:'Vorgeschlagen von '+it.wer+' am '+it.datum+(it.relevanz?'. Relevanz: '+it.relevanz:''),status:'Offen',dok:[]});D.inbox=D.inbox.filter(x=>x.id!==id);sched();setMain('hs');setSub('a',false);render();alert('Kontakt in Netzwerk-Katalog uebernommen.')}
+function rejectInbox(id){if(!confirm('Eintrag ablehnen und entfernen?'))return;D.inbox=D.inbox.filter(x=>x.id!==id);sched();render()}
+function openSettings(){openModal('<div class="m-hdr"><div class="m-t">&#9881; Einstellungen</div><button class="m-cl" onclick="closeModal()">&#10005;</button></div><div class="m-body"><p style="font-size:13px;color:var(--tx2);margin-bottom:14px;line-height:1.5">JSONbin.io verbinden fuer geteilten Datenstand.</p><div class="sr"><label>Master-Key</label><input id="st-k" type="password" value="'+JBK+'" placeholder="$2a$10$..."></div><div class="sr"><label>Bin-ID</label><input id="st-i" value="'+JBI+'" placeholder="6..."></div><div id="st-msg" style="min-height:18px"></div><div class="sdiv"></div><p style="font-size:12px;color:var(--tx3)">Redakteur-PIN: <strong>TF2025</strong></p></div><div class="m-foot"><button class="btn" onclick="testJB()">Verbindung testen</button><button class="btn" onclick="closeModal()">Schliessen</button><button class="btn b-p" onclick="saveSet()">Speichern & Sync</button></div>')}
+async function testJB(){const k=document.getElementById('st-k').value.trim();const i=document.getElementById('st-i').value.trim();if(!k||!i){document.getElementById('st-msg').innerHTML='<div class="s-err">Beide Felder ausfuellen.</div>';return}document.getElementById('st-msg').textContent='Testen...';try{const r=await fetch(JBB+i+'/latest',{headers:{'X-Master-Key':k}});document.getElementById('st-msg').innerHTML=r.ok?'<div class="s-ok">&#10003; Verbindung erfolgreich</div>':'<div class="s-err">&#10005; Fehler</div>'}catch(x){document.getElementById('st-msg').innerHTML='<div class="s-err">&#10005; Netzwerkfehler</div>'}}
+async function saveSet(){JBK=document.getElementById('st-k').value.trim();JBI=document.getElementById('st-i').value.trim();localStorage.setItem('jbk',JBK);localStorage.setItem('jbi',JBI);closeModal();await syncLoad();render()}
+if(sessionStorage.getItem('tf_role'))startAs(sessionStorage.getItem('tf_role'));
+</script>
+</body>
+</html>
